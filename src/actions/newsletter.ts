@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db/prisma";
+import { rateLimitByIp, LIMITS } from "@/lib/security/rate-limit";
 import { newsletterSchema } from "@/lib/validations/catalog";
 
 export type NewsletterState = { ok?: boolean; error?: string };
@@ -10,6 +11,9 @@ export async function subscribeNewsletterAction(
   _prev: NewsletterState,
   formData: FormData,
 ): Promise<NewsletterState> {
+  const rl = await rateLimitByIp("newsletter", LIMITS.newsletter);
+  if (!rl.ok) return { error: "Trop de tentatives, réessayez plus tard." };
+
   const parsed = newsletterSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) {
     return { error: "Adresse e-mail invalide." };

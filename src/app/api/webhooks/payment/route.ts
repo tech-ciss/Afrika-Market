@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimitRequest, LIMITS } from "@/lib/security/rate-limit";
 import { getPaymentProvider, PaymentError } from "@/lib/services/payment.service";
 import { handlePaymentEvent, OrderConflictError } from "@/lib/services/order.service";
 
@@ -20,6 +21,10 @@ export const runtime = "nodejs";
  * 409 conflit transitoire (le prestataire peut rejouer), 200 sinon.
  */
 export async function POST(request: Request) {
+  if (!rateLimitRequest("webhook", request, LIMITS.webhook).ok) {
+    return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+  }
+
   const payload = await request.text();
   const signature = request.headers.get("x-afrika-signature") ?? "";
 

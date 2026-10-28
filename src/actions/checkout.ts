@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
+import { rateLimitByIp, LIMITS } from "@/lib/security/rate-limit";
 import { isSandboxEnabled } from "@/lib/services/payment.service";
 import { createOrder, type CreateOrderResult } from "@/lib/services/order.service";
 import { computeSubtotal, getCart, resolveCartLines, type CartLine } from "@/lib/services/cart.service";
@@ -67,7 +68,13 @@ export async function quoteOrderAction(formData: FormData): Promise<QuoteState> 
   let promoMessage: string | undefined;
   let promoOk: boolean | undefined;
 
-  if (promoCode) {
+  // Limite les essais de codes promo (évite l'énumération de codes).
+  const promoLimited = promoCode ? !(await rateLimitByIp("promo", LIMITS.promo)).ok : false;
+
+  if (promoCode && promoLimited) {
+    promoOk = false;
+    promoMessage = "Trop d'essais, patientez une minute avant de réessayer.";
+  } else if (promoCode) {
     // Mêmes entrées que createOrder, sinon une promo « par catégorie » afficherait
     // au devis un montant différent de celui de la commande.
     const productIds = lines.map((l) => l.productId);

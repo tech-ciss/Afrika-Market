@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 import { hash, compare } from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
+import { rateLimitByIp, LIMITS } from "@/lib/security/rate-limit";
 import { signIn, signOut } from "@/lib/auth/config";
 import { requireUser } from "@/lib/auth/guards";
 import { registerSchema, profileSchema, changePasswordSchema } from "@/lib/validations/auth";
@@ -21,6 +22,9 @@ function safeCallback(value: FormDataEntryValue | null, fallback = "/compte"): s
 }
 
 export async function registerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const rl = await rateLimitByIp("register", LIMITS.register);
+  if (!rl.ok) return { error: `Trop de tentatives. Réessayez dans ${rl.retryAfter} s.` };
+
   const parsed = registerSchema.safeParse({
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
@@ -48,7 +52,7 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
       firstName,
       lastName,
       phone,
-      passwordHash: await hash(password, 10),
+      passwordHash: await hash(password, 12),
       role: intent === "producteur" ? "PRODUCER" : "CLIENT",
       countryId: country?.id ?? null,
     },
@@ -75,6 +79,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
 }
 
 export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const rl = await rateLimitByIp("login", LIMITS.login);
+  if (!rl.ok) return { error: `Trop de tentatives. Réessayez dans ${rl.retryAfter} s.` };
+
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   const password = String(formData.get("password") ?? "");
   const callbackUrl = safeCallback(formData.get("callbackUrl"));
@@ -138,7 +145,7 @@ export async function changePasswordAction(_prev: ActionState, formData: FormDat
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { passwordHash: await hash(parsed.data.newPassword, 10) },
+    data: { passwordHash: await hash(parsed.data.newPassword, 12) },
   });
   return { success: "Mot de passe modifié." };
 }

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
+import { rateLimitByIp, LIMITS } from "@/lib/security/rate-limit";
 
 export type ContactState = { ok?: boolean; error?: string };
 
@@ -13,6 +14,9 @@ const contactSchema = z.object({
 });
 
 export async function contactAction(_prev: ContactState, formData: FormData): Promise<ContactState> {
+  const rl = await rateLimitByIp("contact", LIMITS.contact);
+  if (!rl.ok) return { error: `Trop de messages envoyés. Réessayez dans ${Math.ceil(rl.retryAfter / 60)} min.` };
+
   const parsed = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
