@@ -86,7 +86,7 @@ export default async function HomePage() {
             text: `Une sélection de produits locaux en promotion${maxDiscount > 0 ? `, jusqu'à −${maxDiscount} %` : ""}, dans la limite des stocks.`,
             href: "/produits?promo=1",
             cta: "Voir les promotions",
-            tone: "kola",
+            tone: "kola" as const,
             products: sales.slice(0, 3).map(toSlideProduct),
           },
         ]
