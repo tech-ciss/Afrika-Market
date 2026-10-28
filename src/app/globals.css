@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans", sans-serif;
+    --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      sans-serif;
+    --background: #f6f3ee;
+    --foreground: #2b2118;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: #e07526;
+    color: #fff;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #c75a1c;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-earth-200 bg-white shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition
+      disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-secondary {
+    @apply btn border border-earth-300 bg-white text-earth-800 hover:bg-earth-50;
+  }
+
+  .btn-ghost {
+    @apply btn text-earth-700 hover:bg-earth-100;
+  }
+
+  .btn-dark {
+    @apply btn bg-forest-700 text-white hover:bg-forest-800;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-md {
+    @apply px-4 py-2.5;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3.5 text-base;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-earth-300 bg-white px-3.5 py-2.5 text-sm text-earth-900
+      placeholder:text-earth-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-earth-800;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-forest-50 px-2.5 py-1 text-xs font-medium
+      text-forest-700 ring-1 ring-inset ring-forest-200;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-lg bg-earth-200;
+  }
+
+  .badge-new {
+    @apply absolute left-3 top-3 rounded-full bg-forest-600 px-2 py-0.5 text-[11px] font-bold uppercase
+      tracking-wide text-white;
+  }
+
+  .badge-sale {
+    @apply absolute left-3 top-3 rounded-full bg-brand-600 px-2 py-0.5 text-[11px] font-bold uppercase
+      tracking-wide text-white;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
