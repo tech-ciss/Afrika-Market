@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getCart } from "@/lib/services/cart.service";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getCategories } from "@/lib/services/catalog.service";
+
+const fontHeading = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-heading", display: "swap" });
+const fontBody = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#c75a1c",
+  themeColor: "#12152e",
   width: "device-width",
   initialScale: 1,
 };
@@ -46,14 +50,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ]);
 
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${fontHeading.variable} ${fontBody.variable}`}>
       <body className="flex min-h-screen flex-col">
+        <a
+          href="#contenu"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-800 focus:shadow-card"
+        >
+          Aller au contenu
+        </a>
         <Header
           user={user ? { name: user.name ?? "", role: user.role } : null}
           cartCount={cartLines.reduce((sum, l) => sum + l.quantity, 0)}
           categories={categories.map((c) => ({ name: c.name, slug: c.slug, children: c.children }))}
         />
-        <main className="flex-1">{children}</main>
+        <main id="contenu" className="flex-1">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -38,41 +37,36 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-16 border-t border-earth-200 bg-white">
-      <div className="container-page grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-2">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-lg font-black text-white">
-              A
-            </span>
-            <span className="text-lg font-extrabold tracking-tight text-earth-900">
-              AFRIKA <span className="text-brand-600">MARKET</span>
-            </span>
+    <footer className="mt-20 bg-brand-950 text-white">
+      <div className="container-page grid gap-12 py-14 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+        <div>
+          <Link href="/" className="flex items-center gap-2.5">
+            <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+              <rect x="15" y="1.5" width="19.8" height="19.8" rx="3" transform="rotate(45 15 1.5)" className="fill-white" />
+              <rect x="15" y="9" width="8.5" height="8.5" rx="1.5" transform="rotate(45 15 9)" className="fill-sun-400" />
+            </svg>
+            <span className="font-display text-xl font-extrabold tracking-tight">Afrika Market</span>
           </Link>
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-earth-600">
-            La marketplace qui rapproche l&apos;Afrique de ses consommateurs. Produits locaux, artisanaux et
-            culturels d&apos;Afrique de l&apos;Ouest, avec leur origine, leur producteur et leur histoire.
+          <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/75">
+            La marketplace qui rapproche l&apos;Afrique de ses consommateurs. Produits locaux, artisanaux et culturels
+            d&apos;Afrique de l&apos;Ouest, avec leur origine, leur producteur et leur histoire.
           </p>
-          <ul className="mt-5 space-y-2 text-sm text-earth-600">
-            <li className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-brand-600" aria-hidden /> Abidjan, Côte d&apos;Ivoire
-            </li>
-            <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-brand-600" aria-hidden /> +225 07 00 00 00 00
-            </li>
-            <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-brand-600" aria-hidden /> contact@afrikamarket.ci
-            </li>
-          </ul>
+          <p className="mt-5 text-sm text-white/75">
+            Abidjan, Côte d&apos;Ivoire
+            <br />
+            <a href="mailto:contact@afrikamarket.ci" className="underline-offset-4 hover:underline">
+              contact@afrikamarket.ci
+            </a>
+          </p>
         </div>
 
         {columns.map((col) => (
           <nav key={col.title} aria-label={col.title}>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-earth-900">{col.title}</h3>
+            <h3 className="text-sm font-semibold text-white">{col.title}</h3>
             <ul className="mt-4 space-y-2.5">
               {col.links.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-sm text-earth-600 transition hover:text-brand-700">
+                  <Link href={l.href} className="text-sm text-white/70 transition hover:text-white hover:underline underline-offset-4">
                     {l.label}
                   </Link>
                 </li>
@@ -82,20 +76,10 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-earth-100">
-        <div className="container-page flex flex-col items-center justify-between gap-4 py-5 text-xs text-earth-500 sm:flex-row">
-          <p>© {year} AFRIKA MARKET — Tous droits réservés. Prix en FCFA (XOF).</p>
-          <div className="flex items-center gap-4">
-            <a href="#" aria-label="Facebook" className="hover:text-brand-700">
-              <Facebook className="h-4 w-4" />
-            </a>
-            <a href="#" aria-label="Instagram" className="hover:text-brand-700">
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a href="#" aria-label="Twitter" className="hover:text-brand-700">
-              <Twitter className="h-4 w-4" />
-            </a>
-          </div>
+      <div className="border-t border-white/10">
+        <div className="container-page flex flex-col justify-between gap-2 py-5 text-xs text-white/60 sm:flex-row">
+          <p>© {year} Afrika Market. Tous droits réservés.</p>
+          <p>Prix en FCFA (XOF). Livraison en Côte d&apos;Ivoire.</p>
         </div>
       </div>
     </footer>

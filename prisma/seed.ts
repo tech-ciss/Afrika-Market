@@ -41,18 +41,18 @@ const pick = <T,>(arr: T[], i: number) => arr[i % arr.length]!;
 const IMAGES_DIR = join(process.cwd(), "public", "images", "products");
 
 const CATEGORY_COLORS: Record<string, [string, string]> = {
-  alimentation: ["#e07526", "#a5441a"],
-  boissons: ["#3d8459", "#1b3829"],
-  "epices-condiments": ["#c75a1c", "#6d301a"],
-  "fruits-noix": ["#e68c3c", "#86381c"],
-  "cacao-chocolat": ["#74513e", "#3b170c"],
-  "cafe-the": ["#604437", "#1b120c"],
-  "miel-confitures": ["#edb063", "#c75a1c"],
-  "cereales-legumineuses": ["#bfa587", "#74513e"],
-  "cosmetique-naturelle": ["#5da075", "#24543a"],
-  "artisanat-decoration": ["#987353", "#4f392f"],
-  "coffrets-cadeaux": ["#a5441a", "#3b170c"],
-  coco: ["#8dbf9d", "#2c6946"],
+  alimentation: ["#F4B320", "#B07A0A"],
+  boissons: ["#347F53", "#153623"],
+  "epices-condiments": ["#D4402F", "#7A1F15"],
+  "fruits-noix": ["#F08A3C", "#9A4A12"],
+  "cacao-chocolat": ["#7A4A32", "#2E1810"],
+  "cafe-the": ["#5A3F30", "#1D120C"],
+  "miel-confitures": ["#F9C74B", "#C9820A"],
+  "cereales-legumineuses": ["#C9B68A", "#7A6A45"],
+  "cosmetique-naturelle": ["#55996F", "#1F5436"],
+  "artisanat-decoration": ["#525FAF", "#1C2147"],
+  "coffrets-cadeaux": ["#414B98", "#12152E"],
+  coco: ["#84BA9A", "#266742"],
 };
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -64,30 +64,36 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "cafe-the": "☕",
   "miel-confitures": "🍯",
   "cereales-legumineuses": "🌾",
-  "cosmetique-naturelle": "🧼",
+  "cosmetique-naturelle": "🧴",
   "artisanat-decoration": "🧺",
   "coffrets-cadeaux": "🎁",
   coco: "🥥",
 };
 
-/** Génère un visuel SVG local : aucune dépendance réseau pour l'affichage. */
+/**
+ * Génère un visuel SVG local (aucune dépendance réseau) : fond dégradé par catégorie, motif losanges
+ * inspiré des tissages ouest-africains, pictogramme central. Le nom du produit n'est PAS incrusté :
+ * il est affiché par l'interface. Remplacer ces visuels par de vraies photos dès qu'elles existent.
+ */
 function writeProductImage(file: string, name: string, categorySlug: string) {
-  const [from, to] = CATEGORY_COLORS[categorySlug] ?? ["#e07526", "#6d301a"];
+  const [from, to] = CATEGORY_COLORS[categorySlug] ?? ["#414B98", "#12152E"];
   const emoji = CATEGORY_EMOJI[categorySlug] ?? "🌍";
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="${name}">
+  const label = name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="${label}">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="${from}"/><stop offset="100%" stop-color="${to}"/>
     </linearGradient>
+    <pattern id="p" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M50 8 92 50 50 92 8 50Z" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="3"/>
+      <path d="M50 36 64 50 50 64 36 50Z" fill="#ffffff" fill-opacity="0.10"/>
+    </pattern>
   </defs>
   <rect width="800" height="800" fill="url(#g)"/>
-  <circle cx="400" cy="330" r="190" fill="rgba(255,255,255,0.14)"/>
-  <text x="400" y="400" font-size="190" text-anchor="middle">${emoji}</text>
-  <text x="400" y="620" font-size="46" font-weight="700" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif">${name
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .slice(0, 28)}</text>
-  <text x="400" y="680" font-size="28" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="system-ui, sans-serif">Fait en Côte d'Ivoire</text>
+  <rect width="800" height="800" fill="url(#p)"/>
+  <circle cx="400" cy="400" r="215" fill="#ffffff" fill-opacity="0.16"/>
+  <circle cx="400" cy="400" r="215" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <text x="400" y="400" font-size="230" text-anchor="middle" dominant-baseline="central">${emoji}</text>
 </svg>`;
   writeFileSync(join(IMAGES_DIR, file), svg);
   return `/images/products/${file}`;

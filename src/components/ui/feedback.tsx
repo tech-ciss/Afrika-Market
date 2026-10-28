@@ -17,7 +17,7 @@ export function Stars({
 }) {
   const rounded = Math.round(value * 2) / 2;
   return (
-    <span className={cn("inline-flex items-center gap-1", className)} aria-label={`Note ${value} sur 5`}>
+    <span className={cn("inline-flex items-center gap-1", className)} role="img" aria-label={`Note ${value} sur 5`}>
       <span className="inline-flex">
         {[1, 2, 3, 4, 5].map((i) => {
           const filled = rounded >= i;

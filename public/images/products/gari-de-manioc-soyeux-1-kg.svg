@@ -1,12 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Gari de manioc soyeux 1 kg">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e07526"/><stop offset="100%" stop-color="#a5441a"/>
+      <stop offset="0%" stop-color="#F4B320"/><stop offset="100%" stop-color="#B07A0A"/>
     </linearGradient>
+    <pattern id="p" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M50 8 92 50 50 92 8 50Z" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="3"/>
+      <path d="M50 36 64 50 50 64 36 50Z" fill="#ffffff" fill-opacity="0.10"/>
+    </pattern>
   </defs>
   <rect width="800" height="800" fill="url(#g)"/>
-  <circle cx="400" cy="330" r="190" fill="rgba(255,255,255,0.14)"/>
-  <text x="400" y="400" font-size="190" text-anchor="middle">🍲</text>
-  <text x="400" y="620" font-size="46" font-weight="700" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif">Gari de manioc soyeux 1 kg</text>
-  <text x="400" y="680" font-size="28" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="system-ui, sans-serif">Fait en Côte d'Ivoire</text>
+  <rect width="800" height="800" fill="url(#p)"/>
+  <circle cx="400" cy="400" r="215" fill="#ffffff" fill-opacity="0.16"/>
+  <circle cx="400" cy="400" r="215" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <text x="400" y="400" font-size="230" text-anchor="middle" dominant-baseline="central">🍲</text>
 </svg>

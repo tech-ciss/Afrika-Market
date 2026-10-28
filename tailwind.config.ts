@@ -1,54 +1,89 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Identité visuelle AFRIKA MARKET
+ *  - brand  : indigo profond (teintures bogolan / adire) → actions, liens, prix
+ *  - sun    : safran / or de kente → accent unique, mise en avant
+ *  - kola   : rouge kola → promotions et alertes
+ *  - forest : vert feuille → origine, disponibilité
+ *  - earth  : neutres chauds → texte, bordures, fonds
+ * Contrastes vérifiés WCAG AA (≥ 4,5:1) pour les couples texte/fond usuels.
+ */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
         brand: {
-          50: "#fdf6ec",
-          100: "#fae9cf",
-          200: "#f4d099",
-          300: "#edb063",
-          400: "#e68c3c",
-          500: "#e07526",
-          600: "#c75a1c",
-          700: "#a5441a",
-          800: "#86381c",
-          900: "#6d301a",
-          950: "#3b170c",
+          50: "#F2F3FB",
+          100: "#E4E6F6",
+          200: "#C9CDEC",
+          300: "#A0A7DA",
+          400: "#7380C6",
+          500: "#525FAF",
+          600: "#414B98",
+          700: "#333C7C",
+          800: "#272E60",
+          900: "#1C2147",
+          950: "#12152E",
         },
-        earth: {
-          50: "#f6f3ee",
-          100: "#eae3d7",
-          200: "#d6c7b1",
-          300: "#bfa587",
-          400: "#a98765",
-          500: "#987353",
-          600: "#8b6348",
-          700: "#74513e",
-          800: "#604437",
-          900: "#4f392f",
+        sun: {
+          50: "#FFF8E6",
+          100: "#FEEDBD",
+          200: "#FCDB85",
+          300: "#F9C74B",
+          400: "#F4B320",
+          500: "#D9990F",
+          600: "#B07A0A",
+          700: "#8A5F0D",
+        },
+        kola: {
+          50: "#FEF2F0",
+          100: "#FDE0DB",
+          500: "#D4402F",
+          600: "#BA3022",
+          700: "#9A271B",
         },
         forest: {
-          50: "#f0f7f1",
-          100: "#dcecdf",
-          200: "#bad9c2",
-          300: "#8dbf9d",
-          400: "#5da075",
-          500: "#3d8459",
-          600: "#2c6946",
-          700: "#24543a",
-          800: "#204330",
-          900: "#1b3829",
+          50: "#EFF7F2",
+          100: "#D8EBDF",
+          200: "#B2D6BF",
+          300: "#84BA9A",
+          400: "#55996F",
+          500: "#347F53",
+          600: "#266742",
+          700: "#1F5436",
+          800: "#1A432C",
+          900: "#153623",
+        },
+        earth: {
+          50: "#F7F6F3",
+          100: "#EEECE7",
+          200: "#DEDAD2",
+          300: "#C6C1B6",
+          400: "#76716A",
+          500: "#66615A",
+          600: "#57534D",
+          700: "#46433E",
+          800: "#34322E",
+          900: "#23221F",
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-heading)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.18)",
+        card: "0 1px 2px rgb(18 21 46 / 0.04), 0 10px 30px -14px rgb(18 21 46 / 0.22)",
+      },
+      keyframes: {
+        rise: {
+          from: { opacity: "0", transform: "translateY(18px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        rise: "rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both",
       },
     },
   },

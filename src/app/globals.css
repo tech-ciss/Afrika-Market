@@ -4,12 +4,10 @@
 
 @layer base {
   :root {
-    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-      "Noto Sans", sans-serif;
-    --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-      sans-serif;
-    --background: #f6f3ee;
-    --foreground: #2b2118;
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --background: #fbfaf8;
+    --foreground: #23221f;
   }
 
   html {
@@ -20,25 +18,39 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 
   ::selection {
-    background: #e07526;
-    color: #fff;
+    background: #f9c74b;
+    color: #12152e;
   }
 
   *:focus-visible {
-    outline: 2px solid #c75a1c;
+    outline: 2px solid #414b98;
     outline-offset: 2px;
+  }
+
+  /* Mouvement réduit : pas d'animation ni de défilement fluide (WCAG 2.3.3). */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -48,20 +60,24 @@
   }
 
   .card {
-    @apply rounded-2xl border border-earth-200 bg-white shadow-card;
+    @apply rounded-2xl border border-earth-200 bg-white;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition
+    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition
       disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+    @apply btn bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900;
+  }
+
+  .btn-accent {
+    @apply btn bg-sun-400 text-brand-950 hover:bg-sun-300 active:bg-sun-500;
   }
 
   .btn-secondary {
-    @apply btn border border-earth-300 bg-white text-earth-800 hover:bg-earth-50;
+    @apply btn border border-earth-300 bg-white text-earth-800 hover:border-earth-400 hover:bg-earth-50;
   }
 
   .btn-ghost {
@@ -73,15 +89,15 @@
   }
 
   .btn-sm {
-    @apply px-3 py-1.5 text-xs;
+    @apply px-3.5 py-1.5 text-xs;
   }
 
   .btn-md {
-    @apply px-4 py-2.5;
+    @apply px-5 py-2.5;
   }
 
   .btn-lg {
-    @apply px-6 py-3.5 text-base;
+    @apply px-7 py-3.5 text-base;
   }
 
   .field {
@@ -103,17 +119,36 @@
   }
 
   .badge-new {
-    @apply absolute left-3 top-3 rounded-full bg-forest-600 px-2 py-0.5 text-[11px] font-bold uppercase
-      tracking-wide text-white;
+    @apply absolute left-3 top-3 rounded-full bg-forest-700 px-2.5 py-1 text-[11px] font-semibold text-white;
   }
 
   .badge-sale {
-    @apply absolute left-3 top-3 rounded-full bg-brand-600 px-2 py-0.5 text-[11px] font-bold uppercase
-      tracking-wide text-white;
+    @apply absolute left-3 top-3 rounded-full bg-kola-600 px-2.5 py-1 text-[11px] font-semibold text-white;
+  }
+}
+
+/* Animation de la barre de progression du carrousel (utilisée en style inline). */
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
 @layer utilities {
+  /* Variantes « translucides » de la couleur du texte courant (fonctionne sur fond clair ou sombre). */
+  .border-soft {
+    border-color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+  .bg-soft {
+    background-color: color-mix(in srgb, currentColor 30%, transparent);
+  }
+  .hover-soft:hover {
+    background-color: color-mix(in srgb, currentColor 14%, transparent);
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
