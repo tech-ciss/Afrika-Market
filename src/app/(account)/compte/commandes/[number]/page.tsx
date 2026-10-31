@@ -171,7 +171,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ nu
               {order.payment?.paidAt ? (
                 <p className="mt-1 text-xs text-forest-700">Payé le {formatDateTimeFR(order.payment.paidAt)}</p>
               ) : (
-                <p className="mt-1 text-xs text-amber-700">En attente de confirmation du paiement.</p>
+                <p className="mt-1 text-xs text-sun-700">En attente de confirmation du paiement.</p>
               )}
             </CardContent>
           </Card>

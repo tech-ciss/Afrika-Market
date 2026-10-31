@@ -5,18 +5,19 @@ import { CartView } from "@/components/features/cart-view";
 import { useEffect, useState } from "react";
 
 /** Panier visiteur : lecture du localStorage (Zustand persist). */
-export function GuestCart() {
+export function GuestCart({ freeShipping }: { freeShipping?: { threshold: number; city: string } | null }) {
   const lines = useGuestCart((s) => s.lines);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="h-40 animate-pulse rounded-2xl bg-earth-100" aria-hidden />;
+    return <div className="skeleton h-40 rounded-2xl" aria-hidden />;
   }
 
   return (
     <CartView
       isLoggedIn={false}
+      freeShipping={freeShipping}
       onGuestChange={() => undefined}
       lines={lines.map((l, i) => ({
         id: `${l.productId}:${l.variantId ?? "base"}:${i}`,

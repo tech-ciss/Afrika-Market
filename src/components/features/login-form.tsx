@@ -44,7 +44,7 @@ export function LoginForm({ callbackUrl = "/compte" }: { callbackUrl?: string })
         <p className="font-semibold text-earth-800">Comptes de démonstration</p>
         <ul className="mt-1.5 space-y-0.5">
           <li>Client : aya.kouassi0@mail.ci</li>
-          <li>Vendeur : vendeur@afrikamarket.ci</li>
+          <li>Vendeur : miellerie.du.bandama@afrikamarket.ci</li>
           <li>Admin : admin@afrikamarket.ci</li>
           <li>Super-admin : superadmin@afrikamarket.ci</li>
           <li className="pt-1 text-earth-500">Mot de passe : Afrika2026!</li>

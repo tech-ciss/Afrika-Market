@@ -3,21 +3,22 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "btn inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition disabled:pointer-events-none disabled:opacity-50",
+  "btn inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800",
-        secondary: "border border-earth-300 bg-white text-earth-800 hover:bg-earth-50",
+        primary: "bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900",
+        sun: "bg-sun-400 text-brand-950 hover:bg-sun-300 active:bg-sun-500",
+        secondary: "border border-brand-200 bg-white text-brand-800 hover:border-brand-400 hover:bg-brand-50",
         dark: "bg-forest-700 text-white hover:bg-forest-800",
         ghost: "text-earth-700 hover:bg-earth-100",
-        danger: "bg-red-600 text-white hover:bg-red-700",
+        danger: "bg-kola-600 text-white hover:bg-kola-700",
         link: "text-brand-700 underline-offset-4 hover:underline",
       },
       size: {
-        sm: "px-3 py-1.5 text-xs",
-        md: "px-4 py-2.5 text-sm",
-        lg: "px-6 py-3.5 text-base",
+        sm: "px-3.5 py-1.5 text-xs",
+        md: "px-5 py-2.5 text-sm",
+        lg: "px-7 py-3.5 text-base",
         icon: "h-10 w-10",
       },
     },

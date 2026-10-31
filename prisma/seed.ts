@@ -13,6 +13,7 @@ import { PrismaClient } from "@prisma/client";
 import { hashSync } from "bcryptjs";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { findLocalPhotos, type ImageKind } from "./image-files";
 
 const prisma = new PrismaClient();
 const PASSWORD = hashSync("Afrika2026!", 10);
@@ -40,63 +41,45 @@ const pick = <T,>(arr: T[], i: number) => arr[i % arr.length]!;
 
 const IMAGES_DIR = join(process.cwd(), "public", "images", "products");
 
+/** Couleurs des visuels de substitution (fond clair, fond sombre), alignées sur l'identité du site. */
 const CATEGORY_COLORS: Record<string, [string, string]> = {
-  alimentation: ["#F4B320", "#B07A0A"],
-  boissons: ["#347F53", "#153623"],
-  "epices-condiments": ["#D4402F", "#7A1F15"],
-  "fruits-noix": ["#F08A3C", "#9A4A12"],
-  "cacao-chocolat": ["#7A4A32", "#2E1810"],
-  "cafe-the": ["#5A3F30", "#1D120C"],
-  "miel-confitures": ["#F9C74B", "#C9820A"],
-  "cereales-legumineuses": ["#C9B68A", "#7A6A45"],
-  "cosmetique-naturelle": ["#55996F", "#1F5436"],
-  "artisanat-decoration": ["#525FAF", "#1C2147"],
-  "coffrets-cadeaux": ["#414B98", "#12152E"],
-  coco: ["#84BA9A", "#266742"],
-};
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  alimentation: "🍲",
-  boissons: "🥤",
-  "epices-condiments": "🌶️",
-  "fruits-noix": "🥜",
-  "cacao-chocolat": "🍫",
-  "cafe-the": "☕",
-  "miel-confitures": "🍯",
-  "cereales-legumineuses": "🌾",
-  "cosmetique-naturelle": "🧴",
-  "artisanat-decoration": "🧺",
-  "coffrets-cadeaux": "🎁",
-  coco: "🥥",
+  alimentation: ["#b57a06", "#4a3003"],
+  boissons: ["#c8372d", "#4d100c"],
+  "epices-condiments": ["#a92a22", "#3d0d0a"],
+  "fruits-noix": ["#dfa10b", "#5a3f04"],
+  "cacao-chocolat": ["#6b4331", "#24120b"],
+  "cafe-the": ["#4c3328", "#150c08"],
+  "miel-confitures": ["#f7bc1c", "#7a5504"],
+  "cereales-legumineuses": ["#a09d90", "#3b392f"],
+  "cosmetique-naturelle": ["#5da075", "#163024"],
+  "artisanat-decoration": ["#4358b9", "#121a42"],
+  "coffrets-cadeaux": ["#33449b", "#0e1536"],
+  coco: ["#8dbf9d", "#1f4733"],
 };
 
 /**
- * Génère un visuel SVG local (aucune dépendance réseau) : fond dégradé par catégorie, motif losanges
- * inspiré des tissages ouest-africains, pictogramme central. Le nom du produit n'est PAS incrusté :
- * il est affiché par l'interface. Remplacer ces visuels par de vraies photos dès qu'elles existent.
+ * Visuel de substitution tant qu'aucune vraie photo n'est fournie : une arche et la mention
+ * « Photo à venir » (pour repérer d'un coup d'œil ce qu'il reste à photographier).
+ * Le nom du produit n'est que dans l'aria-label : il est déjà affiché à côté de l'image.
  */
 function writeProductImage(file: string, name: string, categorySlug: string) {
-  const [from, to] = CATEGORY_COLORS[categorySlug] ?? ["#414B98", "#12152E"];
-  const emoji = CATEGORY_EMOJI[categorySlug] ?? "🌍";
-  const label = name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  const [light, dark] = CATEGORY_COLORS[categorySlug] ?? ["#33449b", "#0e1536"];
+  const label = name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").slice(0, 28);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="${label}">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${from}"/><stop offset="100%" stop-color="${to}"/>
-    </linearGradient>
-    <pattern id="p" width="100" height="100" patternUnits="userSpaceOnUse">
-      <path d="M50 8 92 50 50 92 8 50Z" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="3"/>
-      <path d="M50 36 64 50 50 64 36 50Z" fill="#ffffff" fill-opacity="0.10"/>
-    </pattern>
-  </defs>
-  <rect width="800" height="800" fill="url(#g)"/>
-  <rect width="800" height="800" fill="url(#p)"/>
-  <circle cx="400" cy="400" r="215" fill="#ffffff" fill-opacity="0.16"/>
-  <circle cx="400" cy="400" r="215" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
-  <text x="400" y="400" font-size="230" text-anchor="middle" dominant-baseline="central">${emoji}</text>
+  <rect width="800" height="800" fill="${dark}"/>
+  <path d="M170 640 V360 a230 230 0 0 1 460 0 V640 Z" fill="${light}"/>
+  <path d="M215 640 V365 a185 185 0 0 1 370 0 V640 Z" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <circle cx="400" cy="330" r="62" fill="#ffffff" fill-opacity="0.18"/>
+  <text x="400" y="560" font-size="30" text-anchor="middle" fill="#ffffff" fill-opacity="0.8" font-family="system-ui, sans-serif">Photo à venir</text>
 </svg>`;
   writeFileSync(join(IMAGES_DIR, file), svg);
   return `/images/products/${file}`;
+}
+
+/** Vraies photos si elles existent (voir prisma/image-files.ts), sinon visuel de substitution. */
+function resolveImages(kind: ImageKind, stem: string, fallbackFile: string, name: string, categorySlug: string): string[] {
+  const photos = findLocalPhotos(kind, stem);
+  return photos.length > 0 ? photos : [writeProductImage(fallbackFile, name, categorySlug)];
 }
 
 // ---------------------------------------------------------------------------
@@ -415,7 +398,7 @@ async function main() {
         slug: slug(c.name),
         description: c.desc,
         position: i,
-        imageUrl: writeProductImage(`cat-${slug(c.name)}.svg`, c.name, slug(c.name)),
+        imageUrl: resolveImages("categories", slug(c.name), `cat-${slug(c.name)}.svg`, c.name, slug(c.name))[0]!,
       },
     });
     categories[slug(c.name)] = row.id;
@@ -458,7 +441,8 @@ async function main() {
     const producer = await prisma.producer.create({
       data: {
         userId: user.id, name: p.name, slug: slug(p.name), description: p.desc, story: p.story,
-        logoUrl: writeProductImage(`producer-${i}.svg`, p.name, "artisanat-decoration"),
+        logoUrl: resolveImages("producers", slug(p.name), `producer-${i}.svg`, p.name, "artisanat-decoration")[0]!,
+        coverUrl: findLocalPhotos("producers", `${slug(p.name)}--cover`)[0] ?? null,
         countryId: CI, region: p.region, city: p.city, specialties: p.tags,
         certifications: p.certs, status: "APPROVED",
       },
@@ -510,9 +494,11 @@ async function main() {
   // --- Produits -----------------------------------------------------------
   const productIds: string[] = [];
   const productSlugs: string[] = [];
+  const productImages: string[] = [];
   for (const [i, p] of PRODUCTS.entries()) {
     const s = slug(p.name);
-    const image = writeProductImage(`${s}.svg`, p.name, p.category);
+    const imageList = resolveImages("products", s, `${s}.svg`, p.name, p.category);
+    productImages.push(imageList[0]!);
     const product = await prisma.product.create({
       data: {
         producerId: producerIds[p.producer]!,
@@ -525,7 +511,7 @@ async function main() {
         shortDescription: p.desc,
         price: p.price,
         compareAtPrice: p.compareAt ?? null,
-        images: JSON.stringify([image]),
+        images: JSON.stringify(imageList),
         stock: p.stock,
         lowStockThreshold: 5,
         unit: p.unit,
@@ -660,7 +646,7 @@ async function main() {
               productName: p.name,
               productSlug: productSlugs[l.productIdx]!,
               sku: `AM-${String(l.productIdx + 1).padStart(4, "0")}`,
-              imageUrl: `/images/products/${productSlugs[l.productIdx]}.svg`,
+              imageUrl: productImages[l.productIdx] ?? "",
               unit: p.unit,
               origin: `${p.city} — Côte d'Ivoire`,
               producerName: PRODUCERS[p.producer]!.name,

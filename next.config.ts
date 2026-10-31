@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { IMAGE_HOST_SUFFIXES, IMAGE_HOSTS } from "./src/config/images";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -41,8 +42,8 @@ const nextConfig: NextConfig = {
     // Ne plus autoriser "**" : l'optimiseur d'images ne doit pas servir de proxy ouvert.
     // Ajouter ici uniquement les hébergeurs réellement utilisés (Cloudinary, Vercel Blob…).
     remotePatterns: [
-      { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      ...IMAGE_HOSTS.map((hostname) => ({ protocol: "https" as const, hostname })),
+      ...IMAGE_HOST_SUFFIXES.map((suffix) => ({ protocol: "https" as const, hostname: `*${suffix}` })),
     ],
   },
 };

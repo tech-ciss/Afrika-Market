@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SmartImage } from "@/components/ui/smart-image";
 import { notFound } from "next/navigation";
 import { BadgeCheck, CalendarDays, MapPin, Package, Sprout, Star } from "lucide-react";
 import { getProducerBySlug, getProducerPublicStats } from "@/lib/services/producer.service";
@@ -45,12 +46,23 @@ export default async function ProducerPage({ params }: Props) {
 
       {/* En-tête du profil */}
       <div className="overflow-hidden rounded-3xl border border-earth-200 bg-white shadow-card">
-        <div className="h-36 bg-gradient-to-r from-brand-500 via-brand-600 to-earth-700" />
+        <div className="relative h-40 bg-brand-800 sm:h-56">
+          {producer.coverUrl ? (
+            <SmartImage src={producer.coverUrl} alt="" fill priority sizes="(max-width: 1280px) 100vw, 1200px" className="object-cover" />
+          ) : (
+            <div className="weave absolute inset-x-0 bottom-0" aria-hidden />
+          )}
+        </div>
         <div className="px-6 pb-6">
           <div className="-mt-12 flex flex-wrap items-end gap-4">
             {producer.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={producer.logoUrl} alt="" className="h-24 w-24 rounded-2xl border-4 border-white object-cover shadow-lg" />
+              <SmartImage
+                src={producer.logoUrl}
+                alt=""
+                width={96}
+                height={96}
+                className="h-24 w-24 rounded-2xl border-4 border-white bg-white object-cover shadow-lg"
+              />
             ) : null}
             <div className="flex-1">
               <h1 className="flex items-center gap-2 text-2xl font-bold text-earth-900">
@@ -78,7 +90,7 @@ export default async function ProducerPage({ params }: Props) {
             <div>
               <dt className="text-xs uppercase tracking-wide text-earth-500">Note moyenne</dt>
               <dd className="mt-0.5 flex items-center gap-1 text-lg font-bold text-earth-900">
-                <Star className="h-4 w-4 text-amber-500" aria-hidden /> {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
+                <Star className="h-4 w-4 text-sun-600" aria-hidden /> {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
               </dd>
             </div>
             <div>

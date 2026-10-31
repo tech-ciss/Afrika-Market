@@ -1,83 +1,89 @@
 import Link from "next/link";
-import Image from "next/image";
+import { MapPin } from "lucide-react";
 import { formatFCFA } from "@/lib/utils";
+import { parseImages, PLACEHOLDER_IMAGE } from "@/lib/images";
 import { Stars } from "@/components/ui/feedback";
+import { SmartImage } from "@/components/ui/smart-image";
 import type { ProductCard as ProductCardType } from "@/lib/services/catalog.service";
 
-/** Carte produit : l'origine reste toujours visible (§8 et §24), sans décoration superflue. */
-export function ProductCard({
-  product,
-  priority = false,
-  headingLevel = "h3",
-}: {
-  product: ProductCardType;
-  priority?: boolean;
-  /** "h2" quand aucun titre de section ne précède la grille (liste produits, catégorie, favoris). */
-  headingLevel?: "h2" | "h3";
-}) {
-  const Heading = headingLevel;
-  const images = JSON.parse(product.images || "[]") as string[];
-  const cover = images[0] ?? "/images/products/placeholder.svg";
+/**
+ * Carte produit (§8 et §24) : la photo d'abord, l'origine toujours visible sur la photo.
+ * Si le produit a une deuxième photo, elle apparaît au survol.
+ */
+export function ProductCard({ product, priority = false }: { product: ProductCardType; priority?: boolean }) {
+  const images = parseImages(product.images);
+  const cover = images[0] ?? PLACEHOLDER_IMAGE;
+  const alt = images[1];
   const onSale = product.compareAtPrice !== null && product.compareAtPrice > product.price;
   const discount = onSale ? Math.round((1 - product.price / product.compareAtPrice!) * 100) : 0;
-  const origin = product.region ?? product.city ?? product.country.name;
-  const lowStock = product.stock > 0 && product.stock <= product.lowStockThreshold;
+  const origin = product.city ?? product.region ?? product.country.name;
+  const soldOut = product.stock === 0;
+  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
   return (
-    <article className="group flex h-full flex-col">
+    <article className="group relative flex h-full flex-col">
       <Link
         href={`/produits/${product.slug}`}
-        className="relative block aspect-square overflow-hidden rounded-2xl bg-earth-100"
-        tabIndex={-1}
-        aria-hidden
+        className="relative block aspect-[5/6] overflow-hidden rounded-xl bg-earth-100"
+        aria-label={product.name}
       >
-        <Image
+        <SmartImage
           src={cover}
-          alt=""
+          alt={product.name}
           fill
           priority={priority}
-          sizes="(max-width: 640px) 62vw, (max-width: 1024px) 34vw, 25vw"
-          className="object-cover transition duration-500 group-hover:scale-105"
+          sizes={sizes}
+          className={`object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04] ${soldOut ? "grayscale" : ""}`}
         />
-        {onSale ? <span className="badge-sale">−{discount} %</span> : product.isNew ? <span className="badge-new">Nouveau</span> : null}
-        {product.stock === 0 ? (
-          <span className="absolute inset-x-0 bottom-0 bg-brand-950/85 py-2 text-center text-xs font-semibold text-white">
-            Rupture de stock
+        {alt ? (
+          <SmartImage
+            src={alt}
+            alt=""
+            aria-hidden
+            fill
+            sizes={sizes}
+            className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          />
+        ) : null}
+
+        {onSale ? <span className="badge-sale">-{discount}%</span> : product.isNew ? <span className="badge-new">Nouveau</span> : null}
+
+        {soldOut ? (
+          <span className="absolute right-3 top-3 rounded-full bg-earth-900/85 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+            Rupture
+          </span>
+        ) : product.stock <= product.lowStockThreshold ? (
+          <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-semibold text-kola-600">
+            Plus que {product.stock}
           </span>
         ) : null}
+
+        <span className="absolute bottom-3 left-3 inline-flex max-w-[85%] items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-forest-700 shadow-sm">
+          <MapPin className="h-3 w-3 shrink-0" aria-hidden />
+          <span className="truncate">{origin}</span>
+        </span>
       </Link>
 
-      <div className="mt-3 flex flex-1 flex-col">
-        <p className="flex items-center gap-1.5 text-xs font-medium text-forest-700">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-forest-500" aria-hidden />
-          <span className="truncate">{origin}</span>
-        </p>
-
-        <Heading className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-earth-900">
-          <Link href={`/produits/${product.slug}`} className="hover:text-brand-700 hover:underline underline-offset-2">
+      <div className="flex flex-1 flex-col pt-3">
+        <h3 className="font-sans text-sm font-semibold leading-snug tracking-normal text-earth-900">
+          <Link href={`/produits/${product.slug}`} className="hover:text-brand-700">
             {product.name}
           </Link>
-        </Heading>
-
-        <p className="mt-0.5 truncate text-xs text-earth-500">{product.producer.name}</p>
+        </h3>
+        <p className="mt-0.5 text-xs text-earth-500">{product.producer.name}</p>
 
         {product.reviewCount > 0 ? (
           <p className="mt-1.5 flex items-center gap-1.5">
             <Stars value={product.averageRating} size={12} />
-            <span className="text-xs text-earth-500">({product.reviewCount})</span>
+            <span className="text-[11px] text-earth-500">({product.reviewCount})</span>
           </p>
         ) : null}
 
-        <div className="mt-auto pt-3">
-          <p className="flex flex-wrap items-baseline gap-x-2">
-            <span className="font-display text-lg font-bold text-brand-800">{formatFCFA(product.price)}</span>
-            {onSale ? (
-              <span className="text-xs text-earth-400 line-through">{formatFCFA(product.compareAtPrice!)}</span>
-            ) : null}
-            <span className="text-xs text-earth-500">/ {product.unit}</span>
-          </p>
-          {lowStock ? <p className="mt-1 text-xs font-medium text-kola-700">Plus que {product.stock} en stock</p> : null}
-        </div>
+        <p className="mt-auto flex flex-wrap items-baseline gap-x-2 pt-2">
+          <span className="font-display text-lg font-bold text-brand-800">{formatFCFA(product.price)}</span>
+          {onSale ? <span className="text-xs text-earth-500 line-through">{formatFCFA(product.compareAtPrice!)}</span> : null}
+          <span className="text-[11px] text-earth-500">/ {product.unit}</span>
+        </p>
       </div>
     </article>
   );

@@ -1,16 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Huile de karité pour cheveux 100 ml">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#55996F"/><stop offset="100%" stop-color="#1F5436"/>
-    </linearGradient>
-    <pattern id="p" width="100" height="100" patternUnits="userSpaceOnUse">
-      <path d="M50 8 92 50 50 92 8 50Z" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="3"/>
-      <path d="M50 36 64 50 50 64 36 50Z" fill="#ffffff" fill-opacity="0.10"/>
-    </pattern>
-  </defs>
-  <rect width="800" height="800" fill="url(#g)"/>
-  <rect width="800" height="800" fill="url(#p)"/>
-  <circle cx="400" cy="400" r="215" fill="#ffffff" fill-opacity="0.16"/>
-  <circle cx="400" cy="400" r="215" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
-  <text x="400" y="400" font-size="230" text-anchor="middle" dominant-baseline="central">🧴</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Huile de karité pour cheveux">
+  <rect width="800" height="800" fill="#163024"/>
+  <path d="M170 640 V360 a230 230 0 0 1 460 0 V640 Z" fill="#5da075"/>
+  <path d="M215 640 V365 a185 185 0 0 1 370 0 V640 Z" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <circle cx="400" cy="330" r="62" fill="#ffffff" fill-opacity="0.18"/>
+  <text x="400" y="560" font-size="30" text-anchor="middle" fill="#ffffff" fill-opacity="0.8" font-family="system-ui, sans-serif">Photo à venir</text>
 </svg>

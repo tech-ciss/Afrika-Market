@@ -7,6 +7,8 @@ import { PRODUCER_STATUS_LABELS, type ProducerStatus } from "@/lib/validations/e
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/fields";
 import { Alert, Badge } from "@/components/ui/surfaces";
+import { ImagePreviewField } from "@/components/features/image-preview-field";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Ma fiche producteur" };
 
@@ -24,19 +26,17 @@ export default async function ProducerProfilePage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-earth-900">Ma fiche publique</h2>
-        <Badge tone={producer.status === "APPROVED" ? "success" : "warning"}>
-          {PRODUCER_STATUS_LABELS[producer.status as ProducerStatus]}
-        </Badge>
-      </div>
+      <PageHeader
+        title="Ma fiche publique"
+        description={`Visible par tous les visiteurs sur /producteurs/${producer.slug}. C'est votre vitrine : racontez qui vous êtes.`}
+        actions={
+          <Badge tone={producer.status === "APPROVED" ? "success" : "warning"}>
+            {PRODUCER_STATUS_LABELS[producer.status as ProducerStatus]}
+          </Badge>
+        }
+      />
 
-      <p className="mt-1 text-sm text-earth-600">
-        Cette fiche est visible par tous les visiteurs depuis la page{" "}
-        <span className="font-medium text-brand-700">/producteurs/{producer.slug}</span>.
-      </p>
-
-      <form action={updateProducerProfileFormAction} className="mt-5 space-y-4 rounded-2xl border border-earth-200 bg-white p-5">
+      <form action={updateProducerProfileFormAction} className="space-y-5 rounded-2xl border border-earth-200 bg-white p-5 sm:p-6">
         <Field label="Nom de la structure" htmlFor="name" required>
           <Input id="name" name="name" required defaultValue={producer.name} />
         </Field>
@@ -71,9 +71,24 @@ export default async function ProducerProfilePage() {
         <Field label="Certifications & labels" htmlFor="certifications">
           <Input id="certifications" name="certifications" defaultValue={producer.certifications} placeholder="Rainforest Alliance…" />
         </Field>
-        <Field label="URL du logo" htmlFor="logoUrl">
-          <Input id="logoUrl" name="logoUrl" defaultValue={producer.logoUrl ?? ""} placeholder="https://…" />
-        </Field>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ImagePreviewField
+            id="logoUrl"
+            name="logoUrl"
+            label="Logo ou portrait"
+            hint="Image carrée de préférence."
+            defaultValue={producer.logoUrl ?? ""}
+            shape="square"
+          />
+          <ImagePreviewField
+            id="coverUrl"
+            name="coverUrl"
+            label="Bandeau de la page producteur"
+            hint="Photo en paysage : plantation, atelier, coopérative."
+            defaultValue={producer.coverUrl ?? ""}
+            shape="wide"
+          />
+        </div>
 
         <Button type="submit">Enregistrer la fiche</Button>
       </form>

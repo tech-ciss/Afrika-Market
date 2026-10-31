@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-2xl border border-earth-200 bg-white shadow-card", className)} {...props} />;
+  return <div className={cn("rounded-xl border border-earth-200 bg-white shadow-card", className)} {...props} />;
 }
 
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -29,8 +29,8 @@ export function Badge({
   const tones = {
     neutral: "bg-earth-100 text-earth-700 ring-earth-200",
     success: "bg-forest-50 text-forest-700 ring-forest-200",
-    warning: "bg-amber-50 text-amber-800 ring-amber-200",
-    danger: "bg-red-50 text-red-700 ring-red-200",
+    warning: "bg-sun-50 text-sun-700 ring-sun-200",
+    danger: "bg-kola-50 text-kola-700 ring-kola-100",
     brand: "bg-brand-50 text-brand-700 ring-brand-200",
     info: "bg-sky-50 text-sky-700 ring-sky-200",
   };
@@ -47,7 +47,7 @@ export function Badge({
 }
 
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("animate-pulse rounded-lg bg-earth-200", className)} {...props} />;
+  return <div className={cn("skeleton", className)} {...props} />;
 }
 
 export function Alert({
@@ -60,10 +60,10 @@ export function Alert({
   children: React.ReactNode;
 }) {
   const tones = {
-    error: "border-red-200 bg-red-50 text-red-800",
+    error: "border-kola-100 bg-kola-50 text-kola-700",
     success: "border-forest-200 bg-forest-50 text-forest-800",
     info: "border-sky-200 bg-sky-50 text-sky-800",
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
+    warning: "border-sun-200 bg-sun-50 text-brand-950",
   };
   return (
     <div role="alert" className={cn("rounded-xl border px-4 py-3 text-sm", tones[tone], className)}>

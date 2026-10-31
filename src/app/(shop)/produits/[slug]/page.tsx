@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/features/product-card";
 import { AddToCart } from "@/components/features/add-to-cart";
 import { Stars } from "@/components/ui/feedback";
 import { Alert, Badge, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/surfaces";
+import { ProductGallery } from "@/components/features/product-gallery";
 import { ReviewForm } from "@/components/features/review-form";
 
 interface Props {
@@ -81,33 +82,17 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Galerie */}
-        <div className="space-y-3">
-          <div className="relative aspect-square overflow-hidden rounded-3xl border border-earth-200 bg-white">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={images[0]}
-              alt={product.name}
-              className="h-full w-full object-cover"
-              width={800}
-              height={800}
-            />
-            {onSale ? (
+        <ProductGallery
+          images={images}
+          name={product.name}
+          badge={
+            onSale ? (
               <span className="badge-sale !left-5 !top-5 !text-sm">-{discount}%</span>
             ) : product.isNew ? (
               <span className="badge-new !left-5 !top-5 !text-sm">Nouveau</span>
-            ) : null}
-          </div>
-          {images.length > 1 ? (
-            <div className="grid grid-cols-4 gap-3">
-              {images.slice(1, 5).map((src) => (
-                <div key={src} className="aspect-square overflow-hidden rounded-xl border border-earth-200 bg-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`${product.name} — vue ${src}`} className="h-full w-full object-cover" loading="lazy" />
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
+            ) : null
+          }
+        />
 
         {/* Informations */}
         <div>
@@ -335,7 +320,7 @@ export default async function ProductPage({ params }: Props) {
         </section>
       ) : null}
 
-      <p className="mt-10 text-xs text-earth-400">
+      <p className="mt-10 text-xs text-earth-500">
         Dernière mise à jour : {formatDateFR(product.updatedAt)} · Prix en {formatFCFA(product.price)}.
       </p>
     </div>

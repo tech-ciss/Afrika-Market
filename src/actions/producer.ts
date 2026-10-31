@@ -129,6 +129,7 @@ export async function updateProducerProfileAction(_prev: ActionState, formData: 
     specialties: formData.get("specialties"),
     certifications: formData.get("certifications"),
     logoUrl: formData.get("logoUrl"),
+    coverUrl: formData.get("coverUrl"),
   });
   if (!parsed.success) {
     return { fieldErrors: parsed.error.flatten().fieldErrors, error: "Veuillez corriger le formulaire." };
@@ -140,6 +141,7 @@ export async function updateProducerProfileAction(_prev: ActionState, formData: 
       ...parsed.data,
       story: parsed.data.story || null,
       logoUrl: parsed.data.logoUrl || null,
+      coverUrl: parsed.data.coverUrl || null,
       specialties: parsed.data.specialties ?? "",
       certifications: parsed.data.certifications ?? "",
     },
@@ -171,6 +173,12 @@ export async function advanceOrderAction(formData: FormData): Promise<ActionStat
   // Cloisonnement : un producteur ne touche qu'à ses propres lignes de commande.
   const mine = order.items.some((i) => i.producerId === producer.id);
   if (!mine) return { error: "Commande non autorisée." };
+
+  // Le statut est celui de TOUTE la commande : un producteur ne peut le faire avancer que si elle
+  // ne contient que ses articles. Sinon il agirait sur les colis des autres producteurs.
+  if (order.items.some((i) => i.producerId !== producer.id)) {
+    return { error: "Commande partagée avec d'autres producteurs : l'équipe AFRIKA MARKET coordonne sa préparation." };
+  }
 
   const allowed = PRODUCER_TRANSITIONS[order.status as OrderStatus] ?? [];
   if (!allowed.includes(next)) {

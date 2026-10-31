@@ -106,6 +106,33 @@ export async function adminRefundOrderAction(formData: FormData): Promise<Action
 }
 
 // ---------------------------------------------------------------------------
+// Produits (modération) et messages de contact
+// ---------------------------------------------------------------------------
+
+/** Masque ou republie un produit (modération des contenus, §20). */
+export async function adminToggleProductAction(formData: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const product = await prisma.product.findUnique({ where: { id }, select: { id: true, slug: true, isActive: true } });
+  if (!product) return { error: "Produit introuvable." };
+
+  await prisma.product.update({ where: { id }, data: { isActive: !product.isActive } });
+  revalidatePath("/admin/produits");
+  revalidatePath("/produits");
+  revalidatePath(`/produits/${product.slug}`);
+  return { success: product.isActive ? "Produit masqué." : "Produit republié." };
+}
+
+export async function markMessageReadAction(formData: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  await prisma.contactMessage.updateMany({ where: { id }, data: { isRead: true } });
+  revalidatePath("/admin/messages");
+  revalidatePath("/admin");
+  return { success: "Message marqué comme lu." };
+}
+
+// ---------------------------------------------------------------------------
 // Catégories, promotions, zones
 // ---------------------------------------------------------------------------
 
@@ -118,7 +145,7 @@ export async function saveCategoryAction(_prev: ActionState, formData: FormData)
     imageUrl: formData.get("imageUrl"),
     parentId: formData.get("parentId") || null,
     position: formData.get("position") || 0,
-    isActive: formData.get("isActive") !== "off",
+    isActive: formData.get("isActive") === "on",
   });
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors, error: "Catégorie invalide." };
 
@@ -155,7 +182,7 @@ export async function savePromoAction(_prev: ActionState, formData: FormData): P
     categoryId: formData.get("categoryId") || null,
     startsAt: formData.get("startsAt") || new Date().toISOString(),
     endsAt: formData.get("endsAt") || null,
-    isActive: formData.get("isActive") !== "off",
+    isActive: formData.get("isActive") === "on",
   });
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors, error: "Code promo invalide." };
 
@@ -196,8 +223,8 @@ export async function saveZoneAction(_prev: ActionState, formData: FormData): Pr
     basePrice: formData.get("basePrice"),
     freeFrom: formData.get("freeFrom") || null,
     estimatedDays: formData.get("estimatedDays") || 2,
-    allowCashOnDelivery: formData.get("allowCashOnDelivery") !== "off",
-    isActive: formData.get("isActive") !== "off",
+    allowCashOnDelivery: formData.get("allowCashOnDelivery") === "on",
+    isActive: formData.get("isActive") === "on",
     districts: String(formData.get("districts") ?? "")
       .split(",")
       .map((d) => d.trim())

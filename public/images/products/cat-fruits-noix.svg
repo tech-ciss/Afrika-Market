@@ -1,16 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Fruits &amp; noix">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F08A3C"/><stop offset="100%" stop-color="#9A4A12"/>
-    </linearGradient>
-    <pattern id="p" width="100" height="100" patternUnits="userSpaceOnUse">
-      <path d="M50 8 92 50 50 92 8 50Z" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="3"/>
-      <path d="M50 36 64 50 50 64 36 50Z" fill="#ffffff" fill-opacity="0.10"/>
-    </pattern>
-  </defs>
-  <rect width="800" height="800" fill="url(#g)"/>
-  <rect width="800" height="800" fill="url(#p)"/>
-  <circle cx="400" cy="400" r="215" fill="#ffffff" fill-opacity="0.16"/>
-  <circle cx="400" cy="400" r="215" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
-  <text x="400" y="400" font-size="230" text-anchor="middle" dominant-baseline="central">🥜</text>
+  <rect width="800" height="800" fill="#5a3f04"/>
+  <path d="M170 640 V360 a230 230 0 0 1 460 0 V640 Z" fill="#dfa10b"/>
+  <path d="M215 640 V365 a185 185 0 0 1 370 0 V640 Z" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <circle cx="400" cy="330" r="62" fill="#ffffff" fill-opacity="0.18"/>
+  <text x="400" y="560" font-size="30" text-anchor="middle" fill="#ffffff" fill-opacity="0.8" font-family="system-ui, sans-serif">Photo à venir</text>
 </svg>

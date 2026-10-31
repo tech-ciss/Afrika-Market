@@ -38,7 +38,7 @@ export function ReviewForm({ productId, orderId }: { productId: string; orderId:
                   className="p-1"
                 >
                   <Star
-                    className={`h-7 w-7 transition ${rating >= v ? "fill-amber-400 text-amber-400" : "text-earth-300"}`}
+                    className={`h-7 w-7 transition ${rating >= v ? "fill-sun-500 text-sun-500" : "text-earth-300"}`}
                   />
                 </button>
               ))}
@@ -58,7 +58,7 @@ export function ReviewForm({ productId, orderId }: { productId: string; orderId:
               className="min-h-28"
             />
             {state.fieldErrors?.comment?.[0] ? (
-              <p className="mt-1 text-xs font-medium text-red-600">{state.fieldErrors.comment[0]}</p>
+              <p className="mt-1 text-xs font-medium text-kola-600">{state.fieldErrors.comment[0]}</p>
             ) : null}
           </div>
 

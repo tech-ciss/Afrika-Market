@@ -73,7 +73,7 @@ export default async function AddressesPage() {
                   ) : null}
                   <form action={deleteAddressFormAction}>
                     <input type="hidden" name="id" value={a.id} />
-                    <button type="submit" className="btn-ghost btn-sm text-red-600 hover:bg-red-50">
+                    <button type="submit" className="btn-ghost btn-sm text-kola-600 hover:bg-kola-50">
                       Supprimer
                     </button>
                   </form>

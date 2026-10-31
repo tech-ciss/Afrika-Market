@@ -21,8 +21,10 @@ Lancement en **Côte d'Ivoire**, architecture multi-pays (UEMOA), devise **XOF (
 - Stock décrémenté **de façon transactionnelle et conditionnelle** (pas de sur-commande), restitué à toute annulation ou échec de paiement, et libéré automatiquement si la commande n'est pas payée à temps
 - Promotions : pourcentage, montant fixe, livraison offerte, portée produit ou catégorie
 - Espace client : profil, adresses, commandes, wishlist, avis
-- Espace vendeur : produits, stocks, commandes, statistiques
-- Back-office : KPI, graphique de CA, commandes, produits, producteurs, utilisateurs, catégories, avis, promotions, zones, newsletter, messages, paramètres
+- Espace vendeur : tableau de bord, produits et stocks, commandes (filtrables), fiche publique avec photo de couverture
+- Back-office : KPI et courbe de CA, commandes, produits (masquer / republier), producteurs (validation), utilisateurs et rôles, catégories, avis, promotions, zones de livraison, newsletter (export CSV), messages, paramètres
+- **Vraies photos** sans toucher au code : `npm run images:prepare` puis `npm run images:link` (voir [docs/IMAGES.md](docs/IMAGES.md))
+- **Accessibilité** : contrastes WCAG AA vérifiés, navigation clavier, animations désactivées si le visiteur le demande
 - Seed de démonstration réaliste (63 produits, 40 commandes, 9 producteurs…)
 
 ## 🧱 Stack
@@ -112,6 +114,8 @@ Les e-mails des autres producteurs suivent le motif `<structure>.<ville>@afrikam
 | `npm run db:migrate` | Crée et applique une migration (développement) |
 | `npm run db:seed` | Alimente la base de démonstration |
 | `npm run db:reset` | Réinitialise la base et relance le seed |
+| `npm run images:prepare` | Recadre, redimensionne et convertit en WebP les photos de `photos-source/` vers `public/images/` |
+| `npm run images:link` | Rattache les photos aux produits, catégories et producteurs en base (`-- --dry` pour simuler) |
 
 ### Tests
 
@@ -200,6 +204,30 @@ Codes promotionnels de démonstration : `BIENVENUE10`, `AFRIKA20`, `LIVRAISON0`,
 
 ---
 
+## 🎨 Design et images
+
+**Identité « le marché en couleurs »** : indigo de pagne (texte, boutons, sections sombres), jaune cajou (appels à l'action et repères), rouge kola (promotions uniquement), vert palme (origine et traçabilité), pierre claire (fond). Les titres sont en *Bricolage Grotesque* et le texte en *Figtree*, auto-hébergées par `next/font` (aucune requête vers Google côté visiteur). Les photos sont cadrées en **arches** et un bandeau de losanges tissés ponctue les sections sombres.
+
+Toutes les couleurs passent par des *tokens* Tailwind (`brand`, `sun`, `kola`, `forest`, `earth`) définis dans `tailwind.config.ts` : changer une valeur re-thème tout le site.
+
+**Photos** : tant qu'une photo manque, le site affiche un visuel de substitution (arche + « Photo à venir »). Le guide [docs/IMAGES.md](docs/IMAGES.md) liste les 84 fichiers attendus avec leurs noms exacts. Les liens saisis par les vendeurs sont limités à une liste d'hébergeurs (`src/config/images.ts`), partagée avec `next.config.ts`.
+
+**Mouvement** : une scène d'entrée sur l'accueil (les arches montent l'une après l'autre), un bandeau défilant des lieux de production, des images qui apparaissent en fondu, un compteur de panier qui rebondit à l'ajout, une barre de progression vers la livraison offerte. Tout est neutralisé par `prefers-reduced-motion`.
+
+---
+
+## ♿ Accessibilité
+
+- **Contrastes WCAG AA** : texte courant ≥ 4,5:1 sur tous les fonds clairs (la couleur de texte secondaire `earth-500` est à 4,8:1 minimum), texte sur fonds sombres ≥ 7:1.
+- **Clavier** : lien d'évitement « Aller au contenu », contour de focus visible (jaune sur fond sombre), menus refermables avec Échap, cases à cocher et boutons radio de 20 px.
+- **Structure** : un seul `h1` par page, aucun saut de niveau, une `main`, des `nav` étiquetées, `lang="fr"`.
+- **Lecteurs d'écran** : boutons-icônes nommés (`aria-label`), notes en étoiles annoncées (`role="img"`), étapes de commande avec `aria-current="step"`, tableaux avec `scope="col"`.
+- **Cibles tactiles** ≥ 24 px pour les boutons et liens (WCAG 2.2). Pour les cases à cocher et boutons radio (20 px), la zone cliquable est l'étiquette entière.
+
+Pour auditer : Chrome DevTools → Lighthouse (mode mobile) sur `/`, `/produits`, une fiche produit, `/panier` et `/checkout`. Objectifs du cahier des charges : Performance ≥ 80, Accessibilité ≥ 90, SEO ≥ 90.
+
+---
+
 ## 🔒 Sécurité
 
 - Mots de passe hachés avec **bcrypt** (12 rounds)
@@ -213,7 +241,9 @@ Codes promotionnels de démonstration : `BIENVENUE10`, `AFRIKA20`, `LIVRAISON0`,
 - **En-têtes HTTP** : CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS
 - Optimiseur d'images limité à une liste d'hébergeurs autorisés
 - Pages de commande : un client ne lit que SES commandes ; un invité a besoin de son jeton de suivi
-- Cloisonnement : un producteur ne voit et ne modifie que ses propres produits et commandes
+- Cloisonnement : un producteur ne voit et ne modifie que ses propres produits et commandes ; une commande **partagée** entre plusieurs producteurs n'est avancée que par l'équipe
+- Actions destructrices de l'admin (annuler, rembourser, suspendre, désactiver) : confirmation avant envoi ; les règles restent contrôlées côté serveur
+- Export CSV de la newsletter : route réservée au personnel, cellules neutralisées contre l'injection de formules
 - Redirections de callback limitées au même hôte (anti open-redirect)
 - Secrets dans `.env` (ignoré par Git), `.env.example` fourni
 

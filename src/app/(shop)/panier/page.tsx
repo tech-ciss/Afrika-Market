@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getCart } from "@/lib/services/cart.service";
+import { getActiveZones } from "@/lib/services/delivery.service";
+import { CheckoutSteps } from "@/components/features/checkout-steps";
 import { CartView } from "@/components/features/cart-view";
 import { GuestCart } from "@/components/features/guest-cart";
 
@@ -12,18 +13,21 @@ export const metadata: Metadata = {
 
 export default async function CartPage() {
   const user = await getCurrentUser();
-  const lines = user ? await getCart(user.id) : [];
+  const [lines, zones] = await Promise.all([user ? getCart(user.id) : Promise.resolve([]), getActiveZones()]);
+
+  // Seuil de livraison offerte de la zone la plus courante (Abidjan) : donnée métier, pas une constante d'interface.
+  const home = zones.find((z) => z.name === "Abidjan");
+  const freeShipping = home?.freeFrom ? { threshold: home.freeFrom, city: home.name } : null;
 
   return (
     <div className="container-page py-8">
-      <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-earth-500">
-        <Link href="/" className="hover:text-brand-700">Accueil</Link> / <span className="text-earth-800">Panier</span>
-      </nav>
-      <h1 className="mb-6 text-3xl font-bold text-earth-900">Mon panier</h1>
+      <CheckoutSteps current={1} />
+      <h1 className="mb-6 font-display text-3xl font-extrabold sm:text-4xl">Mon panier</h1>
 
       {user ? (
         <CartView
           isLoggedIn
+          freeShipping={freeShipping}
           lines={lines.map((l) => ({
             id: l.id,
             productId: l.productId,
@@ -40,7 +44,7 @@ export default async function CartPage() {
           }))}
         />
       ) : (
-        <GuestCart />
+        <GuestCart freeShipping={freeShipping} />
       )}
     </div>
   );

@@ -1,0 +1,469 @@
+// AFRIKA MARKET — Modèle de données
+// Dialecte de développement : SQLite (Prisma).
+// Les statuts/enum du cahier des charges sont stockés en String et validés
+// côté serveur par Zod (src/lib/validations/enums.ts) pour rester portables
+// vers PostgreSQL. Les montants sont des Int en FCFA (XOF) : le franc CFA
+// n'a pas de centime, aucune conversion décimale n'est nécessaire.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Comptes et rôles
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("CLIENT") // CLIENT | PRODUCER | ADMIN | SUPER_ADMIN
+  firstName    String
+  lastName     String
+  phone        String?
+  countryId    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  country     Country?     @relation(fields: [countryId], references: [id])
+  producer    Producer?
+  addresses   Address[]
+  orders      Order[]
+  reviews     Review[]
+  wishlist    WishlistItem[]
+  cartItems   CartItem[]
+
+  @@index([role])
+}
+
+model Country {
+  id       String  @id @default(cuid())
+  name     String
+  code     String  @unique // CI, SN, BJ, TG, BF, ML, GN
+  currency String  @default("XOF")
+  isActive Boolean @default(true)
+  position Int     @default(0)
+
+  users     User[]
+  products  Product[]
+  producers Producer[]
+  zones     DeliveryZone[]
+}
+
+// ---------------------------------------------------------------------------
+// Producteurs
+// ---------------------------------------------------------------------------
+
+model Producer {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  slug        String   @unique
+  description String
+  story       String?
+  logoUrl     String?
+  coverUrl    String?
+  countryId   String
+  region      String
+  city        String
+  specialties String   @default("") // tags séparés par des virgules
+  certifications String @default("") // labels / certifications
+  status      String   @default("PENDING") // PENDING | APPROVED | SUSPENDED | REJECTED
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country  Country   @relation(fields: [countryId], references: [id])
+  products Product[]
+  orders   OrderItem[]
+
+  @@index([status])
+  @@index([countryId])
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  imageUrl    String?
+  position    Int     @default(0)
+  isActive    Boolean @default(true)
+  parentId    String?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+  promos   PromoCode[]
+}
+
+model Product {
+  id                String   @id @default(cuid())
+  producerId        String
+  categoryId        String
+  name              String
+  slug              String   @unique
+  description       String
+  shortDescription  String
+  price             Int // FCFA
+  compareAtPrice    Int? // prix barré (promotion)
+  currency          String   @default("XOF")
+  images            String   @default("[]") // JSON array d'URLs, la 1re = couverture
+  stock             Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  weight            Int? // grammes
+  unit              String   @default("pièce") // kg, L, pièce, sachet...
+  sku               String?  @unique
+  countryId         String
+  region            String?
+  city              String?
+  originMethod      String? // méthode de production
+  harvestPeriod     String? // période de récolte
+  characteristics   String   @default("[]") // JSON array de {label, value}
+  conservation      String? // conditions de conservation
+  tags              String   @default("") // tags séparés par des virgules
+  isActive          Boolean  @default(true)
+  isFeatured        Boolean  @default(false)
+  isNew             Boolean  @default(true)
+  averageRating     Float    @default(0)
+  reviewCount       Int      @default(0)
+  salesCount        Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  producer  Producer        @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  category  Category        @relation(fields: [categoryId], references: [id])
+  country   Country         @relation(fields: [countryId], references: [id])
+  variants  ProductVariant[]
+  reviews   Review[]
+  wishlist  WishlistItem[]
+  cartItems CartItem[]
+  orderItems OrderItem[]
+  promoCodes PromoCode[]
+
+  @@index([categoryId])
+  @@index([producerId])
+  @@index([isActive, createdAt])
+  @@index([price])
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  name       String // ex. « 250 g », « Lot de 3 »
+  sku        String  @unique
+  price      Int
+  stock      Int     @default(0)
+  attributes String  @default("{}") // JSON { poids: "250g", contenance: "..." }
+  isActive   Boolean @default(true)
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Adresses et livraison
+// ---------------------------------------------------------------------------
+
+model Address {
+  id             String  @id @default(cuid())
+  userId         String
+  label          String  @default("Domicile")
+  firstName      String
+  lastName       String
+  phone          String
+  country        String  @default("Côte d'Ivoire")
+  city           String // ex. Abidjan
+  district       String // ex. Cocody
+  neighborhood   String?
+  street         String
+  additionalInfo String?
+  latitude       Float?
+  longitude      Float?
+  isDefault      Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DeliveryZone {
+  id                 String  @id @default(cuid())
+  countryId          String
+  name               String // ex. Abidjan, Bouaké
+  description        String?
+  basePrice          Int // FCFA
+  freeFrom           Int? // livraison offerte à partir de ce montant
+  estimatedDays      Int     @default(2)
+  allowCashOnDelivery Boolean @default(true)
+  isActive           Boolean @default(true)
+  position           Int     @default(0)
+
+  country   Country            @relation(fields: [countryId], references: [id])
+  districts DeliveryDistrict[]
+  deliveries Delivery[]
+  orders    Order[]
+
+  @@index([countryId, isActive])
+}
+
+model DeliveryDistrict {
+  id     String @id @default(cuid())
+  zoneId String
+  name   String // ex. Cocody, Yopougon
+
+  zone DeliveryZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@unique([zoneId, name])
+  @@index([zoneId])
+}
+
+model Delivery {
+  id             String    @id @default(cuid())
+  orderId        String    @unique
+  zoneId         String
+  method         String    @default("HOME") // HOME | RELAY_POINT | PICKUP_PRODUCER | PICKUP_PARTNER
+  status         String    @default("PENDING") // PENDING..DELIVERED | FAILED | CANCELLED
+  recipient      String?
+  phone          String?
+  addressSnapshot String   @default("{}") // JSON de l'adresse au moment de la commande
+  trackingNumber String?   @unique
+  shippingCost   Int       @default(0)
+  estimatedDate  DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  order Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  zone  DeliveryZone @relation(fields: [zoneId], references: [id])
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Commandes, paiements
+// ---------------------------------------------------------------------------
+
+model Order {
+  id             String   @id @default(cuid())
+  number         String   @unique // AM-20261027-00001
+  userId         String? // null = commande invité
+  email          String
+  status         String   @default("PENDING_PAYMENT") // voir enums.ts
+  subtotal       Int
+  shippingCost   Int      @default(0)
+  discount       Int      @default(0)
+  total          Int
+  currency       String   @default("XOF")
+  shippingAddress String  @default("{}") // JSON snapshot
+  billingAddress  String  @default("{}") // JSON snapshot
+  note           String?
+  guestToken     String? // permet à un invité de suivre sa commande
+  promoCodeId    String?
+  promoCode      String?
+  paymentMethod  String? // wave | orange | mtn | moov | card | cash
+  isPaid         Boolean  @default(false)
+  paidAt         DateTime?
+  cancelledAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user    User?       @relation(fields: [userId], references: [id])
+  promo   PromoCode?  @relation(fields: [promoCodeId], references: [id])
+  zone    DeliveryZone? @relation(fields: [zoneId], references: [id])
+  zoneId  String?
+  items   OrderItem[]
+  payment Payment?
+  delivery Delivery?
+  events  OrderEvent[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String?
+  producerId  String?
+  variantId   String?
+  // --- snapshot : ne doit jamais changer après la commande ---
+  productName String
+  productSlug String
+  sku         String
+  imageUrl    String  @default("")
+  unit        String  @default("pièce")
+  origin      String  @default("") // « Côte d'Ivoire · Korhogo »
+  producerName String @default("")
+  quantity    Int
+  unitPrice   Int
+  taxAmount   Int     @default(0)
+  total       Int
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  producer Producer? @relation(fields: [producerId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([producerId])
+}
+
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  label     String
+  note      String?
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  orderId       String    @unique
+  provider      String // wave | orange | mtn | moov | card | cash | sandbox
+  providerRef   String?   @unique // référence côté prestataire (transactionId)
+  amount        Int
+  currency      String    @default("XOF")
+  status        String    @default("PENDING") // PENDING|PROCESSING|PAID|FAILED|CANCELLED|REFUNDED
+  metadata      String    @default("{}") // JSON
+  failureReason String?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Promotions, avis, wishlist, newsletter
+// ---------------------------------------------------------------------------
+
+model PromoCode {
+  id                 String    @id @default(cuid())
+  code               String    @unique
+  description         String?
+  type               String // PERCENTAGE | FIXED | FREE_SHIPPING
+  value              Int       @default(0) // % ou montant FCFA
+  scope              String    @default("GLOBAL") // GLOBAL | PRODUCT | CATEGORY
+  productId          String?
+  categoryId         String?
+  minimumAmount      Int       @default(0)
+  maximumUses        Int?
+  maximumUsesPerUser Int?
+  startsAt           DateTime  @default(now())
+  endsAt             DateTime?
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@index([isActive])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  orderId   String? // un avis n'est possible que si le produit a été acheté
+  rating    Int // 1..5
+  comment   String
+  images    String   @default("[]") // JSON array
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  reply     String? // réponse du producteur
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId, orderId])
+  @@index([productId, status])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String?
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant?  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, variantId])
+  @@index([userId])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  source    String   @default("footer")
+  userId    String? // renseigné si l'abonné a un compte
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Messages de contact (page Contact)
+// ---------------------------------------------------------------------------
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Paramètres globaux (super-admin)
+// ---------------------------------------------------------------------------
+
+model Setting {
+  key       String   @id
+  value     String
+  label     String   @default("")
+  updatedAt DateTime @updatedAt
+}

@@ -36,7 +36,7 @@ function Section({ title, defaultOpen = true, children }: { title: string; defau
         aria-expanded={open}
       >
         {title}
-        {open ? <ChevronUp className="h-4 w-4 text-earth-400" /> : <ChevronDown className="h-4 w-4 text-earth-400" />}
+        {open ? <ChevronUp className="h-4 w-4 text-earth-500" /> : <ChevronDown className="h-4 w-4 text-earth-500" />}
       </button>
       {open ? <div className="mt-3 space-y-2">{children}</div> : null}
     </div>
@@ -130,7 +130,7 @@ export function CatalogFiltersPanel({ facets, current, query }: Props) {
               className="field"
               aria-label="Prix minimum"
             />
-            <span className="text-earth-400">—</span>
+            <span className="text-earth-500">—</span>
             <input
               type="number"
               min={0}
@@ -142,7 +142,7 @@ export function CatalogFiltersPanel({ facets, current, query }: Props) {
               aria-label="Prix maximum"
             />
           </div>
-          <p className="text-xs text-earth-400">
+          <p className="text-xs text-earth-500">
             Fourchette disponible : {facets.minPrice.toLocaleString("fr-FR")} – {facets.maxPrice.toLocaleString("fr-FR")} FCFA
           </p>
         </Section>

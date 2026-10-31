@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle2, MapPin, Package, Truck } from "lucide-react";
+import { Clock, MapPin, Package, Truck } from "lucide-react";
 import { getOrderByNumber, getOrderForGuest } from "@/lib/services/order.service";
 import { getCurrentUser, isStaff } from "@/lib/auth/guards";
 import { isSandboxEnabled } from "@/lib/services/payment.service";
 import { formatFCFA, formatDateTimeFR, parseJsonObject } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/validations/enums";
-import { Alert, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/surfaces";
+import { Alert, Badge } from "@/components/ui/surfaces";
+import { SmartImage } from "@/components/ui/smart-image";
+import { CheckoutSteps } from "@/components/features/checkout-steps";
+import { PLACEHOLDER_IMAGE } from "@/lib/images";
 
 export const metadata: Metadata = { title: "Commande confirmée" };
 
@@ -52,23 +55,52 @@ export default async function ConfirmationPage({
       : null;
   const address = parseJsonObject<Record<string, string>>(order.shippingAddress, {});
   const delivery = order.delivery;
+  const statusTone = cancelled || order.status === "REFUNDED" ? "danger" : awaitingPayment ? "warning" : "success";
 
   return (
-    <div className="container-page py-10">
-      <div className="mx-auto max-w-3xl">
-        <div className="flex flex-col items-center text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-forest-100 text-forest-700">
-            <CheckCircle2 className="h-9 w-9" aria-hidden />
-          </span>
-          <h1 className="mt-4 text-3xl font-bold text-earth-900">Merci {address.firstName ?? ""} !</h1>
-          <p className="mt-2 text-earth-600">
-            Votre commande <span className="font-bold text-brand-700">{order.number}</span> a bien été enregistrée.
-          </p>
-          <p className="mt-1 text-sm text-earth-500">Passée le {formatDateTimeFR(order.createdAt)}</p>
-        </div>
+    <div className="container-page py-8 sm:py-10">
+      {cancelled ? null : <CheckoutSteps current={3} />}
 
+      <div className="mx-auto max-w-3xl text-center">
+        {/* Le « ✓ » se trace une seule fois à l'arrivée : le moment fort du parcours. */}
+        <span
+          className={`arch mx-auto flex h-24 w-20 items-end justify-center pb-5 ${
+            cancelled ? "bg-kola-500 text-white" : awaitingPayment ? "bg-sun-400 text-brand-950" : "bg-forest-600 text-white"
+          }`}
+        >
+          {cancelled ? (
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden>
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          ) : awaitingPayment ? (
+            <Clock className="h-8 w-8" aria-hidden />
+          ) : (
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12.5l4.5 4.5L19 7.5" className="animate-draw [stroke-dasharray:26]" />
+            </svg>
+          )}
+        </span>
+
+        <h1 className="mt-6 font-display text-4xl font-extrabold sm:text-5xl">
+          {cancelled ? "Commande annulée" : `Merci ${address.firstName ?? ""} !`}
+        </h1>
+        <p className="mx-auto mt-3 max-w-lg text-earth-600">
+          {cancelled
+            ? "Cette commande n'a pas abouti."
+            : awaitingPayment
+              ? "Votre commande est enregistrée. Il ne reste qu'à régler pour la confirmer."
+              : "Votre commande a bien été enregistrée. Les producteurs s'occupent du reste."}
+        </p>
+        <p className="mt-5 inline-flex items-center gap-3 rounded-full border-2 border-dashed border-sun-400 bg-sun-50 px-5 py-2">
+          <span className="text-xs text-earth-600">Commande</span>
+          <span className="font-display text-lg font-extrabold tracking-tight text-brand-900">{order.number}</span>
+        </p>
+        <p className="mt-2 text-xs text-earth-500">Passée le {formatDateTimeFR(order.createdAt)}</p>
+      </div>
+
+      <div className="mx-auto mt-8 max-w-5xl">
         {awaitingPayment ? (
-          <Alert tone="warning" className="mt-6">
+          <Alert tone="warning" className="mb-6">
             <p className="font-semibold">Paiement en attente</p>
             <p className="mt-1">
               Votre commande sera confirmée dès réception du paiement. Sans paiement, elle sera annulée
@@ -82,39 +114,38 @@ export default async function ConfirmationPage({
           </Alert>
         ) : null}
         {cancelled ? (
-          <Alert tone="error" className="mt-6">
+          <Alert tone="error" className="mb-6">
             Cette commande a été annulée (paiement non abouti ou délai dépassé). Vous pouvez repasser commande depuis
             la boutique.
           </Alert>
         ) : null}
 
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Détail de la commande</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-y divide-earth-100">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+          {/* Détail de la commande */}
+          <section className="rounded-2xl border border-earth-200 bg-white p-5 sm:p-6">
+            <h2 className="font-display text-xl font-bold text-brand-950">Détail de la commande</h2>
+            <ul className="mt-4 divide-y divide-earth-100">
               {order.items.map((item) => (
                 <li key={item.id} className="flex items-center gap-3 py-3">
-                  <span className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-earth-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.imageUrl || "/images/products/placeholder.svg"} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  <span className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-earth-100">
+                    <SmartImage src={item.imageUrl || PLACEHOLDER_IMAGE} alt="" fill sizes="56px" className="object-cover" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-earth-900">{item.productName}</span>
-                    <span className="block text-xs text-earth-500">
-                      {item.producerName} · {item.origin}
+                    <span className="mt-0.5 flex items-center gap-1 text-xs text-earth-500">
+                      <MapPin className="h-3 w-3 shrink-0 text-forest-600" aria-hidden />
+                      <span className="truncate">
+                        {item.producerName} · {item.origin}
+                      </span>
                     </span>
                   </span>
                   <span className="shrink-0 text-sm text-earth-600">× {item.quantity}</span>
-                  <span className="w-28 shrink-0 text-right text-sm font-semibold text-earth-900">
-                    {formatFCFA(item.total)}
-                  </span>
+                  <span className="w-24 shrink-0 text-right text-sm font-semibold text-earth-900">{formatFCFA(item.total)}</span>
                 </li>
               ))}
             </ul>
 
-            <dl className="mt-4 space-y-2 border-t border-earth-100 pt-4 text-sm">
+            <dl className="mt-4 space-y-2 border-t-2 border-dashed border-earth-200 pt-4 text-sm">
               <div className="flex justify-between text-earth-600">
                 <dt>Sous-total</dt>
                 <dd>{formatFCFA(order.subtotal)}</dd>
@@ -129,58 +160,55 @@ export default async function ConfirmationPage({
                 <dt>Livraison</dt>
                 <dd>{order.shippingCost === 0 ? "Offerte" : formatFCFA(order.shippingCost)}</dd>
               </div>
-              <div className="flex justify-between border-t border-earth-100 pt-3 text-base font-bold text-earth-900">
-                <dt>{order.isPaid ? "Total réglé" : "Total à régler"}</dt>
-                <dd className="text-brand-700">{formatFCFA(order.total)}</dd>
+              <div className="flex items-baseline justify-between border-t border-earth-100 pt-3">
+                <dt className="font-semibold text-earth-900">{order.isPaid ? "Total réglé" : "Total à régler"}</dt>
+                <dd className="font-display text-2xl font-extrabold text-brand-800">{formatFCFA(order.total)}</dd>
               </div>
             </dl>
-          </CardContent>
-        </Card>
+          </section>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <Card>
-            <CardContent className="text-sm">
+          {/* Suivi : statut, livraison, adresse */}
+          <aside className="space-y-4">
+            <div className="rounded-2xl border border-earth-200 bg-white p-5 text-sm">
               <p className="flex items-center gap-2 font-semibold text-earth-900">
                 <Package className="h-4 w-4 text-brand-600" aria-hidden /> Statut
               </p>
-              <p className="mt-1 text-earth-600">{ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}</p>
-              <p className="mt-1 text-xs text-earth-500">
+              <p className="mt-2">
+                <Badge tone={statusTone}>{ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}</Badge>
+              </p>
+              <p className="mt-2 text-xs text-earth-500">
                 Paiement : {PAYMENT_METHOD_LABELS[order.paymentMethod as PaymentMethod] ?? "—"}
               </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="text-sm">
+            </div>
+
+            <div className="rounded-2xl border border-earth-200 bg-white p-5 text-sm">
               <p className="flex items-center gap-2 font-semibold text-earth-900">
                 <Truck className="h-4 w-4 text-brand-600" aria-hidden /> Livraison
               </p>
-              <p className="mt-1 text-earth-600">
+              <p className="mt-2 text-earth-700">
                 {delivery?.zone.name ?? address.zoneName ?? "—"}
-                {delivery?.estimatedDate
-                  ? ` · estimée le ${formatDateTimeFR(delivery.estimatedDate)}`
-                  : ""}
+                {delivery?.estimatedDate ? ` · estimée le ${formatDateTimeFR(delivery.estimatedDate)}` : ""}
               </p>
               {delivery?.trackingNumber ? (
-                <p className="mt-1 text-xs text-earth-500">Suivi : {delivery.trackingNumber}</p>
+                <p className="mt-1 text-xs text-earth-500">
+                  Suivi : <span className="font-mono">{delivery.trackingNumber}</span>
+                </p>
               ) : null}
-            </CardContent>
-          </Card>
+              <p className="mt-4 flex items-center gap-2 border-t border-earth-100 pt-4 font-semibold text-earth-900">
+                <MapPin className="h-4 w-4 text-brand-600" aria-hidden /> Adresse
+              </p>
+              <p className="mt-2 text-earth-700">
+                {address.firstName} {address.lastName}
+                <br />
+                {address.street}, {address.district}, {address.city}
+              </p>
+              <p className="text-xs text-earth-500">{address.phone}</p>
+            </div>
+          </aside>
         </div>
 
-        <Card className="mt-4">
-          <CardContent className="text-sm">
-            <p className="flex items-center gap-2 font-semibold text-earth-900">
-              <MapPin className="h-4 w-4 text-brand-600" aria-hidden /> Adresse de livraison
-            </p>
-            <p className="mt-1 text-earth-600">
-              {address.firstName} {address.lastName} · {address.street}, {address.district}, {address.city}
-            </p>
-            <p className="text-xs text-earth-500">{address.phone}</p>
-          </CardContent>
-        </Card>
-
         {!user ? (
-          <Alert tone="info" className="mt-5">
+          <Alert tone="info" className="mt-6">
             Conservez ce lien pour suivre votre commande : aucun compte n&apos;est nécessaire.
           </Alert>
         ) : null}

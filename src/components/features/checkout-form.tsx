@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useActionState } from "react";
-import { Banknote, CheckCircle2, CreditCard, Loader2, MapPin, Smartphone } from "lucide-react";
+import { useActionState, type ReactNode } from "react";
+import { Banknote, CheckCircle2, CreditCard, Loader2, Lock, MapPin, Smartphone } from "lucide-react";
 import { placeOrderAction, quoteOrderAction, type PlaceOrderState, type QuoteState } from "@/actions/checkout";
 import { useGuestCart } from "@/lib/store/guest-cart";
 import { formatFCFA } from "@/lib/utils";
@@ -11,6 +11,9 @@ import { PAYMENT_METHOD_LABELS, DELIVERY_METHOD_LABELS } from "@/lib/validations
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/fields";
 import { Alert } from "@/components/ui/surfaces";
+import { SmartImage } from "@/components/ui/smart-image";
+import { SummaryCard } from "@/components/ui/summary-card";
+import { PLACEHOLDER_IMAGE } from "@/lib/images";
 import type { ZoneWithDistricts } from "@/lib/services/delivery.service";
 import type { CartLineView } from "@/components/features/cart-view";
 
@@ -26,6 +29,21 @@ interface AddressView {
   street: string;
   additionalInfo: string | null;
   isDefault: boolean;
+}
+
+/** Bloc numéroté du formulaire : 1 Coordonnées, 2 Adresse, 3 Livraison, 4 Paiement. */
+function Section({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-earth-200 bg-white p-5 sm:p-6">
+      <h2 className="flex items-center gap-3 font-display text-xl font-bold text-brand-950">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-800 text-sm font-bold text-sun-400">
+          {n}
+        </span>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
 }
 
 const PAYMENT_METHODS = ["wave", "orange", "mtn", "moov", "card", "cash"] as const;
@@ -146,11 +164,7 @@ export function CheckoutForm({
       <div className="space-y-5">
         {state?.ok === false ? <Alert tone="error">{state.error}</Alert> : null}
 
-        <section className="rounded-2xl border border-earth-200 bg-white p-5">
-          <h2 className="flex items-center gap-2 text-base font-bold text-earth-900">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-xs text-white">1</span>
-            Coordonnées
-          </h2>
+        <Section n={1} title="Coordonnées">
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Field label="E-mail" htmlFor="email" required error={state?.fieldErrors?.email?.[0]}>
               <Input id="email" name="email" type="email" required defaultValue={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} autoComplete="email" />
@@ -174,13 +188,9 @@ export function CheckoutForm({
               pour retrouver vos commandes et adresses.
             </p>
           ) : null}
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-earth-200 bg-white p-5">
-          <h2 className="flex items-center gap-2 text-base font-bold text-earth-900">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-xs text-white">2</span>
-            Adresse de livraison
-          </h2>
+        <Section n={2} title="Adresse de livraison">
 
           {addresses.length > 0 ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -191,8 +201,8 @@ export function CheckoutForm({
                   onClick={() => applyAddress(a)}
                   className={
                     addressId === a.id
-                      ? "rounded-xl border-2 border-brand-600 bg-brand-50 p-3 text-left text-sm"
-                      : "rounded-xl border border-earth-300 p-3 text-left text-sm hover:border-earth-400"
+                      ? "rounded-xl border border-brand-700 bg-brand-50 p-3 text-left text-sm ring-1 ring-brand-700"
+                      : "rounded-xl border border-earth-300 p-3 text-left text-sm transition-colors hover:border-brand-300 hover:bg-earth-50"
                   }
                 >
                   <span className="font-semibold text-earth-900">{a.label}</span>
@@ -248,14 +258,11 @@ export function CheckoutForm({
           </div>
 
           {addressId ? <input type="hidden" name="addressId" value={addressId} /> : null}
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-earth-200 bg-white p-5">
-          <h2 className="flex items-center gap-2 text-base font-bold text-earth-900">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-xs text-white">3</span>
-            Mode de livraison
-          </h2>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <Section n={3} title="Mode de livraison">
+          <p className="mt-4 text-sm font-semibold text-earth-800">Comment souhaitez-vous recevoir votre commande ?</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {DELIVERY_METHODS.map((m) => {
               const fee = m === "PICKUP_PRODUCER" || m === "PICKUP_PARTNER" ? 0 : zone?.basePrice ?? 0;
               return (
@@ -263,8 +270,8 @@ export function CheckoutForm({
                   key={m}
                   className={
                     deliveryMethod === m
-                      ? "flex cursor-pointer items-start gap-3 rounded-xl border-2 border-brand-600 bg-brand-50 p-3"
-                      : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 hover:border-earth-400"
+                      ? "flex cursor-pointer items-start gap-3 rounded-xl border border-brand-700 bg-brand-50 p-3 ring-1 ring-brand-700"
+                      : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 transition-colors hover:border-brand-300 hover:bg-earth-50"
                   }
                 >
                   <input
@@ -273,7 +280,7 @@ export function CheckoutForm({
                     value={m}
                     checked={deliveryMethod === m}
                     onChange={() => setDeliveryMethod(m)}
-                    className="mt-1 h-4 w-4 border-earth-300 text-brand-600 focus:ring-brand-500"
+                    className="mt-0.5 h-5 w-5 accent-brand-700"
                   />
                   <span>
                     <span className="block text-sm font-semibold text-earth-900">{DELIVERY_METHOD_LABELS[m]}</span>
@@ -286,14 +293,15 @@ export function CheckoutForm({
             })}
           </div>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <p className="mt-6 text-sm font-semibold text-earth-800">Zone de livraison</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {zones.map((z) => (
               <label
                 key={z.id}
                 className={
                   zoneId === z.id
-                    ? "flex cursor-pointer items-start gap-3 rounded-xl border-2 border-brand-600 bg-brand-50 p-3"
-                    : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 hover:border-earth-400"
+                    ? "flex cursor-pointer items-start gap-3 rounded-xl border border-brand-700 bg-brand-50 p-3 ring-1 ring-brand-700"
+                    : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 transition-colors hover:border-brand-300 hover:bg-earth-50"
                 }
               >
                 <input
@@ -302,7 +310,7 @@ export function CheckoutForm({
                   value={z.id}
                   checked={zoneId === z.id}
                   onChange={() => setZoneId(z.id)}
-                  className="mt-1 h-4 w-4 border-earth-300 text-brand-600 focus:ring-brand-500"
+                  className="mt-0.5 h-5 w-5 accent-brand-700"
                 />
                 <span>
                   <span className="flex items-center gap-1 text-sm font-semibold text-earth-900">
@@ -316,13 +324,9 @@ export function CheckoutForm({
               </label>
             ))}
           </div>
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-earth-200 bg-white p-5">
-          <h2 className="flex items-center gap-2 text-base font-bold text-earth-900">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-xs text-white">4</span>
-            Paiement
-          </h2>
+        <Section n={4} title="Paiement">
           <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {PAYMENT_METHODS.map((m) => {
               const disabled = m === "cash" && zone ? !zone.allowCashOnDelivery : false;
@@ -333,8 +337,8 @@ export function CheckoutForm({
                     disabled
                       ? "flex cursor-not-allowed items-start gap-3 rounded-xl border border-earth-200 bg-earth-50 p-3 opacity-60"
                       : paymentMethod === m
-                        ? "flex cursor-pointer items-start gap-3 rounded-xl border-2 border-brand-600 bg-brand-50 p-3"
-                        : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 hover:border-earth-400"
+                        ? "flex cursor-pointer items-start gap-3 rounded-xl border border-brand-700 bg-brand-50 p-3 ring-1 ring-brand-700"
+                        : "flex cursor-pointer items-start gap-3 rounded-xl border border-earth-300 p-3 transition-colors hover:border-brand-300 hover:bg-earth-50"
                   }
                 >
                   <input
@@ -344,7 +348,7 @@ export function CheckoutForm({
                     checked={paymentMethod === m}
                     disabled={disabled}
                     onChange={() => setPaymentMethod(m)}
-                    className="mt-1 h-4 w-4 border-earth-300 text-brand-600 focus:ring-brand-500"
+                    className="mt-0.5 h-5 w-5 accent-brand-700"
                   />
                   <span>
                     <span className="flex items-center gap-1.5 text-sm font-semibold text-earth-900">
@@ -363,20 +367,18 @@ export function CheckoutForm({
               <Textarea id="note" name="note" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} className="min-h-20" />
             </Field>
           </div>
-        </section>
+        </Section>
       </div>
 
       {/* Récapitulatif */}
       <aside className="lg:sticky lg:top-40 lg:h-fit">
-        <div className="rounded-2xl border border-earth-200 bg-white p-5">
-          <h2 className="text-base font-bold text-earth-900">Votre commande</h2>
+        <SummaryCard title="Votre commande">
 
           <ul className="mt-4 max-h-72 space-y-3 overflow-y-auto pr-1">
             {displayLines.map((l) => (
               <li key={l.id} className="flex items-center gap-3">
-                <span className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-earth-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={l.image || "/images/products/placeholder.svg"} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <span className="relative h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-earth-100">
+                  <SmartImage src={l.image || PLACEHOLDER_IMAGE} alt="" fill sizes="48px" className="object-cover" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-earth-900">{l.name}</span>
@@ -402,7 +404,7 @@ export function CheckoutForm({
               </Button>
             </div>
             {quote?.promoMessage ? (
-              <p className={`mt-1.5 text-xs font-medium ${quote.promoOk ? "text-forest-700" : "text-red-600"}`} role="status">
+              <p className={`mt-1.5 text-xs font-medium ${quote.promoOk ? "text-forest-700" : "text-kola-600"}`} role="status">
                 {quote.promoMessage}
               </p>
             ) : null}
@@ -426,13 +428,15 @@ export function CheckoutForm({
               </dt>
               <dd className="font-semibold text-earth-900">{formatFCFA(quote?.shipping ?? 0)}</dd>
             </div>
-            <div className="flex justify-between border-t border-earth-100 pt-3 text-base font-bold text-earth-900">
+            <div className="flex items-baseline justify-between border-t-2 border-dashed border-earth-200 pt-3 text-base font-bold text-earth-900">
               <dt>Total</dt>
-              <dd className="text-brand-700">{formatFCFA(quote?.total ?? 0)}</dd>
+              <dd className="font-display text-2xl font-extrabold text-brand-800">{formatFCFA(quote?.total ?? 0)}</dd>
             </div>
           </dl>
 
-          <p className="mt-1 text-right text-[11px] text-earth-500">Montants recalculés et vérifiés côté serveur.</p>
+          <p className="mt-2 flex items-center justify-end gap-1 text-[11px] text-earth-500">
+            <Lock className="h-3 w-3" aria-hidden /> Montants recalculés et vérifiés côté serveur.
+          </p>
 
           <Button type="submit" size="lg" className="mt-4 w-full" disabled={pending || displayLines.length === 0}>
             {pending ? (
@@ -451,7 +455,7 @@ export function CheckoutForm({
           <p className="mt-3 text-center text-[11px] leading-relaxed text-earth-500">
             En confirmant, vous acceptez nos conditions générales de vente. Paiement {PAYMENT_METHOD_LABELS[paymentMethod]}.
           </p>
-        </div>
+        </SummaryCard>
       </aside>
     </form>
   );

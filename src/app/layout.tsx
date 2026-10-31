@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -7,8 +7,10 @@ import { getCart } from "@/lib/services/cart.service";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getCategories } from "@/lib/services/catalog.service";
 
-const fontHeading = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-heading", display: "swap" });
-const fontBody = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+// Polices auto-hébergées par Next au build : aucune requête vers Google côté visiteur,
+// compatible avec la CSP « font-src 'self' ».
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", display: "swap" });
+const sans = Figtree({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#12152e",
+  themeColor: "#25357d",
   width: "device-width",
   initialScale: 1,
 };
@@ -50,11 +52,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ]);
 
   return (
-    <html lang="fr" className={`${fontHeading.variable} ${fontBody.variable}`}>
+    <html lang="fr" className={`${display.variable} ${sans.variable}`}>
       <body className="flex min-h-screen flex-col">
+        {/* Lien d'évitement : au clavier, premier Tab = accès direct au contenu sans repasser par tout le menu. */}
         <a
           href="#contenu"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-800 focus:shadow-card"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-900 focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-white"
         >
           Aller au contenu
         </a>
@@ -63,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           cartCount={cartLines.reduce((sum, l) => sum + l.quantity, 0)}
           categories={categories.map((c) => ({ name: c.name, slug: c.slug, children: c.children }))}
         />
-        <main id="contenu" className="flex-1">
+        <main id="contenu" tabIndex={-1} className="flex-1 outline-none">
           {children}
         </main>
         <Footer />

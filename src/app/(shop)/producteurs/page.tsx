@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SmartImage } from "@/components/ui/smart-image";
 import { BadgeCheck, MapPin, Sprout } from "lucide-react";
 import { getApprovedProducers } from "@/lib/services/producer.service";
 
@@ -32,12 +33,20 @@ export default async function ProducersPage() {
           <Link
             key={p.id}
             href={`/producteurs/${p.slug}`}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-earth-200 bg-white shadow-card transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-earth-200 bg-white transition-shadow hover:border-brand-300 hover:shadow-lift"
           >
-            <div className="relative h-28 bg-gradient-to-r from-brand-500 to-earth-600">
+            <div className="relative h-32 bg-brand-800">
+              {p.coverUrl ? (
+                <SmartImage src={p.coverUrl} alt="" fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
+              ) : null}
               {p.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.logoUrl} alt="" className="absolute -bottom-8 left-5 h-20 w-20 rounded-2xl border-4 border-white object-cover shadow" loading="lazy" />
+                <SmartImage
+                  src={p.logoUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="absolute -bottom-8 left-5 h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow"
+                />
               ) : null}
             </div>
             <div className="p-5 pt-12">

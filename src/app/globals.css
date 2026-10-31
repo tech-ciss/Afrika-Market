@@ -4,10 +4,8 @@
 
 @layer base {
   :root {
-    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --background: #fbfaf8;
-    --foreground: #23221f;
+    --background: #f7f7f5;
+    --foreground: #1b1a16;
   }
 
   html {
@@ -16,30 +14,30 @@
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
+    @apply bg-earth-50 font-sans text-earth-900 antialiased;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-heading);
+    @apply font-display text-brand-950;
     letter-spacing: -0.02em;
   }
 
   ::selection {
-    background: #f9c74b;
-    color: #12152e;
+    @apply bg-sun-300 text-brand-950;
   }
 
   *:focus-visible {
-    outline: 2px solid #414b98;
-    outline-offset: 2px;
+    @apply outline outline-2 outline-offset-2 outline-brand-600;
   }
 
-  /* Mouvement réduit : pas d'animation ni de défilement fluide (WCAG 2.3.3). */
+  /* Sur fond sombre, le contour de focus passe au jaune pour rester visible. */
+  .on-dark *:focus-visible,
+  .on-dark:focus-visible {
+    @apply outline-sun-400;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -60,11 +58,11 @@
   }
 
   .card {
-    @apply rounded-2xl border border-earth-200 bg-white;
+    @apply rounded-xl border border-earth-200 bg-white shadow-card;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition
+    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors
       disabled:pointer-events-none disabled:opacity-50;
   }
 
@@ -72,12 +70,12 @@
     @apply btn bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900;
   }
 
-  .btn-accent {
+  .btn-sun {
     @apply btn bg-sun-400 text-brand-950 hover:bg-sun-300 active:bg-sun-500;
   }
 
   .btn-secondary {
-    @apply btn border border-earth-300 bg-white text-earth-800 hover:border-earth-400 hover:bg-earth-50;
+    @apply btn border border-brand-200 bg-white text-brand-800 hover:border-brand-400 hover:bg-brand-50;
   }
 
   .btn-ghost {
@@ -102,7 +100,7 @@
 
   .field {
     @apply w-full rounded-xl border border-earth-300 bg-white px-3.5 py-2.5 text-sm text-earth-900
-      placeholder:text-earth-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
+      placeholder:text-earth-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
   }
 
   .label {
@@ -114,46 +112,56 @@
       text-forest-700 ring-1 ring-inset ring-forest-200;
   }
 
+  /* Chargement : reflet qui traverse, plus lisible qu'un simple clignotement. */
   .skeleton {
-    @apply animate-pulse rounded-lg bg-earth-200;
+    @apply rounded-lg bg-earth-200;
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.6) 50%, transparent 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
   }
 
   .badge-new {
-    @apply absolute left-3 top-3 rounded-full bg-forest-700 px-2.5 py-1 text-[11px] font-semibold text-white;
+    @apply absolute left-3 top-3 rounded-full bg-sun-400 px-2.5 py-0.5 text-[11px] font-bold text-brand-950;
   }
 
   .badge-sale {
-    @apply absolute left-3 top-3 rounded-full bg-kola-600 px-2.5 py-1 text-[11px] font-semibold text-white;
+    @apply absolute left-3 top-3 rounded-full bg-kola-500 px-2.5 py-0.5 text-[11px] font-bold text-white;
   }
-}
 
-/* Animation de la barre de progression du carrousel (utilisée en style inline). */
-@keyframes progress {
-  from {
-    transform: scaleX(0);
+  /* Cadre en arche : arcades d'Abidjan et architecture sahélienne. */
+  .arch {
+    border-radius: 999px 999px 1.25rem 1.25rem;
   }
-  to {
-    transform: scaleX(1);
+
+  /* Bandeau de losanges tissés, motif de pagne très sobre. */
+  .weave {
+    height: 10px;
+    background-color: theme("colors.brand.950");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 5 L7 0 L14 5 L21 0 L28 5 L21 10 L14 5 L7 10 Z' fill='none' stroke='%23f7bc1c' stroke-width='1.2'/%3E%3C/svg%3E");
+    background-size: 28px 10px;
+  }
+
+  .weave-soft {
+    height: 10px;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 5 L7 0 L14 5 L21 0 L28 5 L21 10 L14 5 L7 10 Z' fill='none' stroke='%2325357d' stroke-opacity='0.18' stroke-width='1.2'/%3E%3C/svg%3E");
+    background-size: 28px 10px;
   }
 }
 
 @layer utilities {
-  /* Variantes « translucides » de la couleur du texte courant (fonctionne sur fond clair ou sombre). */
-  .border-soft {
-    border-color: color-mix(in srgb, currentColor 40%, transparent);
-  }
-  .bg-soft {
-    background-color: color-mix(in srgb, currentColor 30%, transparent);
-  }
-  .hover-soft:hover {
-    background-color: color-mix(in srgb, currentColor 14%, transparent);
-  }
-
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  /* Titre d'accueil : très serré, optique « affiche de marché ». */
+  .display-xl {
+    @apply font-display font-extrabold leading-[0.95] tracking-[-0.035em];
+  }
+  .pause-on-hover:hover > * {
+    animation-play-state: paused;
   }
 }

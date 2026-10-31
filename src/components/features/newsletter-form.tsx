@@ -14,8 +14,8 @@ export function NewsletterForm({ source = "footer" }: { source?: string }) {
 
   if (done) {
     return (
-      <p role="status" className="rounded-xl border border-forest-200 bg-white px-4 py-3 text-sm font-medium text-forest-700">
-        ✅ Merci ! Votre inscription est confirmée.
+      <p role="status" className="rounded-full border border-forest-200 bg-white px-5 py-3 text-sm font-medium text-forest-700">
+        Merci ! Votre inscription est confirmée.
       </p>
     );
   }
@@ -33,14 +33,14 @@ export function NewsletterForm({ source = "footer" }: { source?: string }) {
           name="email"
           required
           placeholder="votre@email.ci"
-          className="w-full rounded-xl border border-earth-300 bg-white px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+          className="w-full rounded-full border border-earth-300 bg-white px-5 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
         />
         <Button type="submit" disabled={pending} size="lg" className="shrink-0">
           {pending ? "Inscription…" : "S'inscrire"}
         </Button>
       </div>
       {state.error ? (
-        <p role="alert" className="text-xs font-medium text-red-600">
+        <p role="alert" className="text-xs font-medium text-kola-600">
           {state.error}
         </p>
       ) : null}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { saveProductAction } from "@/actions/producer";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/fields";
 import { Alert } from "@/components/ui/surfaces";
+import { ImagePreviewField } from "@/components/features/image-preview-field";
 
 export interface ProductFormValue {
   id?: string;
@@ -32,6 +33,21 @@ export interface ProductFormValue {
   isFeatured: boolean;
 }
 
+function FormSection({ n, title, hint, children }: { n: number; title: string; hint?: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-earth-200 bg-white p-5 sm:p-6">
+      <h2 className="flex items-center gap-3 font-display text-xl font-bold text-brand-950">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-800 text-sm font-bold text-sun-400">
+          {n}
+        </span>
+        {title}
+      </h2>
+      {hint ? <p className="mt-1 text-sm text-earth-600">{hint}</p> : null}
+      {children}
+    </section>
+  );
+}
+
 export function ProductForm({
   product,
   categories,
@@ -51,8 +67,7 @@ export function ProductForm({
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
       {state.error ? <Alert tone="error">{state.error}</Alert> : null}
 
-      <section className="rounded-2xl border border-earth-200 bg-white p-5">
-        <h2 className="text-base font-bold text-earth-900">Informations générales</h2>
+      <FormSection n={1} title="Informations générales">
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Nom du produit" htmlFor="name" required className="sm:col-span-2" error={state.fieldErrors?.name?.[0]}>
             <Input id="name" name="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Noix de cajou premium 500 g" />
@@ -83,11 +98,20 @@ export function ProductForm({
             <Textarea id="description" name="description" required defaultValue={product?.description ?? ""} className="min-h-32" />
           </Field>
         </div>
-      </section>
+      </FormSection>
 
-      <section className="rounded-2xl border border-earth-200 bg-white p-5">
-        <h2 className="text-base font-bold text-earth-900">Prix &amp; stock</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+      <FormSection n={2} title="Photo, prix et stock">
+        <div className="mt-4">
+          <ImagePreviewField
+            id="imageUrl"
+            name="imageUrl"
+            label="Photo principale"
+            hint={`Lien vers votre photo (Cloudinary, Vercel Blob, UploadThing, Unsplash, Pexels).${product?.id ? " Laisser vide pour conserver l'actuelle." : ""}`}
+            defaultValue={product?.images?.[0] ?? ""}
+            error={state.fieldErrors?.images?.[0]}
+          />
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
           <Field label="Prix (FCFA)" htmlFor="price" required error={state.fieldErrors?.price?.[0]}>
             <Input id="price" name="price" type="number" min={1} required defaultValue={product?.price ?? ""} />
           </Field>
@@ -112,14 +136,15 @@ export function ProductForm({
           <Field label="Tags (séparés par des virgules)" htmlFor="tags">
             <Input id="tags" name="tags" defaultValue={product?.tags ?? ""} placeholder="cajou, snacking, séché" />
           </Field>
-          <Field label="URL de l'image" htmlFor="imageUrl" hint="Laisser vide pour conserver l'image actuelle.">
-            <Input id="imageUrl" name="imageUrl" defaultValue={product?.images?.[0] ?? ""} placeholder="https://…" />
-          </Field>
-        </div>
-      </section>
 
-      <section className="rounded-2xl border border-earth-200 bg-white p-5">
-        <h2 className="text-base font-bold text-earth-900">Origine &amp; traçabilité</h2>
+        </div>
+      </FormSection>
+
+      <FormSection
+        n={3}
+        title="Origine et traçabilité"
+        hint="Ce que le client voit sur la fiche produit : c'est ce qui fait la différence de AFRIKA MARKET."
+      >
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Région" htmlFor="region">
             <Input id="region" name="region" defaultValue={product?.region ?? ""} placeholder="Savanes" />
@@ -137,9 +162,9 @@ export function ProductForm({
             <Input id="conservation" name="conservation" defaultValue={product?.conservation ?? ""} placeholder="Lieu frais et sec" />
           </Field>
         </div>
-      </section>
+      </FormSection>
 
-      <div className="flex flex-wrap gap-4 rounded-2xl border border-earth-200 bg-white p-5">
+      <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-2xl border border-earth-200 bg-white p-5 sm:p-6">
         <label className="flex items-center gap-2 text-sm text-earth-700">
           <Checkbox name="isActive" defaultChecked={product?.isActive ?? true} /> Produit visible dans la boutique
         </label>

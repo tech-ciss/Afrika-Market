@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f7f7f5;
+    --foreground: #1b1a16;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-earth-50 font-sans text-earth-900 antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-brand-950;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    @apply bg-sun-300 text-brand-950;
+  }
+
+  *:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brand-600;
+  }
+
+  /* Sur fond sombre, le contour de focus passe au jaune pour rester visible. */
+  .on-dark *:focus-visible,
+  .on-dark:focus-visible {
+    @apply outline-sun-400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-xl border border-earth-200 bg-white shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors
+      disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900;
+  }
+
+  .btn-sun {
+    @apply btn bg-sun-400 text-brand-950 hover:bg-sun-300 active:bg-sun-500;
+  }
+
+  .btn-secondary {
+    @apply btn border border-brand-200 bg-white text-brand-800 hover:border-brand-400 hover:bg-brand-50;
+  }
+
+  .btn-ghost {
+    @apply btn text-earth-700 hover:bg-earth-100;
+  }
+
+  .btn-dark {
+    @apply btn bg-forest-700 text-white hover:bg-forest-800;
+  }
+
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-xs;
+  }
+
+  .btn-md {
+    @apply px-5 py-2.5;
+  }
+
+  .btn-lg {
+    @apply px-7 py-3.5 text-base;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-earth-300 bg-white px-3.5 py-2.5 text-sm text-earth-900
+      placeholder:text-earth-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-earth-800;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-forest-50 px-2.5 py-1 text-xs font-medium
+      text-forest-700 ring-1 ring-inset ring-forest-200;
+  }
+
+  /* Chargement : reflet qui traverse, plus lisible qu'un simple clignotement. */
+  .skeleton {
+    @apply rounded-lg bg-earth-200;
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.6) 50%, transparent 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+
+  .badge-new {
+    @apply absolute left-3 top-3 rounded-full bg-sun-400 px-2.5 py-0.5 text-[11px] font-bold text-brand-950;
+  }
+
+  .badge-sale {
+    @apply absolute left-3 top-3 rounded-full bg-kola-500 px-2.5 py-0.5 text-[11px] font-bold text-white;
+  }
+
+  /* Cadre en arche : arcades d'Abidjan et architecture sahélienne. */
+  .arch {
+    border-radius: 999px 999px 1.25rem 1.25rem;
+  }
+
+  /* Bandeau de losanges tissés, motif de pagne très sobre. */
+  .weave {
+    height: 10px;
+    background-color: theme("colors.brand.950");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 5 L7 0 L14 5 L21 0 L28 5 L21 10 L14 5 L7 10 Z' fill='none' stroke='%23f7bc1c' stroke-width='1.2'/%3E%3C/svg%3E");
+    background-size: 28px 10px;
+  }
+
+  .weave-soft {
+    height: 10px;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 5 L7 0 L14 5 L21 0 L28 5 L21 10 L14 5 L7 10 Z' fill='none' stroke='%2325357d' stroke-opacity='0.18' stroke-width='1.2'/%3E%3C/svg%3E");
+    background-size: 28px 10px;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  /* Titre d'accueil : très serré, optique « affiche de marché ». */
+  .display-xl {
+    @apply font-display font-extrabold leading-[0.95] tracking-[-0.035em];
+  }
+  .pause-on-hover:hover > * {
+    animation-play-state: paused;
+  }
+}

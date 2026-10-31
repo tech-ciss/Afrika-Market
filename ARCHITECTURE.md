@@ -237,6 +237,7 @@ L'essentiel des mutations passe par des Server Actions (pas d'API REST publique)
 | `/api/auth/[...nextauth]` | GET, POST | Auth.js (connexion, session, déconnexion) | CSRF Auth.js |
 | `/api/webhooks/payment` | POST | Évènements du prestataire de paiement | signature HMAC, rate limit, idempotence |
 | `/api/cron/expire-orders` | GET | Annule les commandes impayées expirées et restitue le stock | `Authorization: Bearer $CRON_SECRET` |
+| `/admin/newsletter/export` | GET | Export CSV des abonnés actifs (UTF-8 avec BOM, séparateur `;`) | rôle ADMIN / SUPER_ADMIN |
 
 Webhook : le corps JSON décrit l'évènement (référence de paiement, statut, montant éventuel) et la signature HMAC-SHA256
 est transmise dans l'en-tête `x-afrika-signature`. Réponses :
@@ -259,7 +260,30 @@ est transmise dans l'en-tête `x-afrika-signature`. Réponses :
 - `generateMetadata()` dynamique sur les fiches produit, catégories et producteurs ;
 - Open Graph, `sitemap.xml`, `robots.txt` (espaces privés exclus), URLs par slug ;
 - pagination serveur (12 produits par page), pas de requête N+1 (includes Prisma ciblés) ;
-- images du seed en SVG locaux : aucun appel réseau supplémentaire à l'affichage.
+- images via `next/image` (WebP/AVIF, tailles responsives, `priority` sur l'image principale) ; polices auto-hébergées (`next/font`, `display: swap`) ;
+- `SmartImage` : fondu à l'arrivée et repli sur le visuel de substitution si une photo est introuvable ;
+- animations en CSS pur (aucune bibliothèque d'animation), désactivées par `prefers-reduced-motion`.
+
+---
+
+## 11 bis. Design system et images
+
+**Tokens** (`tailwind.config.ts`) : `brand` (indigo), `sun` (jaune cajou), `kola` (rouge, promotions), `forest` (vert, origine), `earth` (neutres). Les composants n'emploient jamais de couleur Tailwind par défaut : tout passe par ces tokens.
+
+**Briques réutilisables** :
+
+| Composant | Usage |
+|---|---|
+| `ui/smart-image` | image du site : fondu + repli |
+| `ui/page-header`, `ui/stat` (`StatStrip`, `DataTable`), `ui/bar-list`, `ui/filter-chips` | pages vendeur et admin |
+| `ui/summary-card`, `features/checkout-steps` | panier, checkout, confirmation |
+| `ui/confirm-button` | confirmation avant action destructrice |
+| `layout/dashboard-nav` | navigation latérale vendeur (claire) et admin (sombre, par sections) |
+| `features/image-preview-field` | champ « lien d'image » avec aperçu |
+
+**Pipeline d'images** : `public/images/<type>/<slug>.webp` (+ `--2`, `--3` pour la galerie, `--cover` pour le bandeau producteur). `prisma/image-files.ts` détecte les photos présentes ; le seed les utilise, sinon génère un SVG de substitution ; `scripts/prepare-images.ts` (sharp) recadre et convertit ; `scripts/link-images.ts` met la base à jour sans la réinitialiser.
+
+**Organisation des espaces** : le vendeur et l'admin partagent la même structure (barre latérale + `PageHeader` en `h1` + sections en `h2`). Les listes filtrables utilisent des paramètres d'URL (`?statut=`, `?q=`, `?edit=`) : les vues sont partageables et fonctionnent sans JavaScript.
 
 ---
 
@@ -268,6 +292,7 @@ est transmise dans l'en-tête `x-afrika-signature`. Réponses :
 | Niveau | Outil | Couverture |
 |---|---|---|
 | Unitaire | Vitest | panier, promotions, livraison, stock (dont achats simultanés), commandes, paiement (succès, échec, webhook invalide, webhook rejoué) |
+| Unitaire | Vitest | détection des photos locales et lecture des images produit (`tests/images.test.ts`) |
 | E2E | Playwright | contrôle d'accès par rôle ; parcours d'achat complet sandbox (desktop + mobile) |
 
 Le test d'achats simultanés (`tests/stock-concurrent.test.ts`) simule l'atomicité d'un `UPDATE … WHERE stock >= n` : il vérifie que la logique

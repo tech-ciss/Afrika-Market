@@ -16,7 +16,9 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "images:prepare": "tsx scripts/prepare-images.ts",
+    "images:link": "tsx scripts/link-images.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

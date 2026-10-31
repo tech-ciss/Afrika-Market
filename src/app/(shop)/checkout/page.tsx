@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getActiveZones } from "@/lib/services/delivery.service";
 import { getCart } from "@/lib/services/cart.service";
 import { CheckoutForm } from "@/components/features/checkout-form";
+import { CheckoutSteps } from "@/components/features/checkout-steps";
 
 export const metadata: Metadata = {
   title: "Finaliser ma commande",
@@ -37,7 +38,8 @@ export default async function CheckoutPage({
 
   return (
     <div className="container-page py-8">
-      <h1 className="mb-6 text-3xl font-bold text-earth-900">Finaliser ma commande</h1>
+      <CheckoutSteps current={2} />
+      <h1 className="mb-6 font-display text-3xl font-extrabold sm:text-4xl">Finaliser ma commande</h1>
       <CheckoutForm
         user={profile}
         zones={zones}

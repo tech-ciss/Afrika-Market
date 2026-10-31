@@ -27,7 +27,7 @@ export function Stars({
               key={i}
               width={size}
               height={size}
-              className={filled ? "fill-amber-400 text-amber-400" : half ? "fill-amber-400/60 text-amber-300" : "text-earth-300"}
+              className={filled ? "fill-sun-500 text-sun-500" : half ? "fill-sun-500/60 text-sun-400" : "text-earth-300"}
               aria-hidden
             />
           );
@@ -50,9 +50,11 @@ export function EmptyState({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-earth-300 bg-white px-6 py-14 text-center">
-      <div className="mb-3 text-earth-400">{icon ?? <PackageOpen className="h-10 w-10" aria-hidden />}</div>
-      <h3 className="text-base font-semibold text-earth-900">{title}</h3>
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-brand-200 bg-white px-6 py-14 text-center">
+      <div className="arch mb-5 flex h-24 w-20 items-end justify-center bg-brand-50 pb-5 text-brand-600">
+        {icon ?? <PackageOpen className="h-9 w-9" aria-hidden />}
+      </div>
+      <h3 className="font-display text-xl font-bold text-brand-950">{title}</h3>
       {description ? <p className="mt-1 max-w-md text-sm text-earth-600">{description}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
@@ -109,7 +111,7 @@ export function Pagination({
         .filter((p) => p === 1 || p === pageCount || Math.abs(p - page) <= 2)
         .map((p, idx, arr) => (
           <React.Fragment key={p}>
-            {idx > 0 && arr[idx - 1]! < p - 1 ? <span className="px-1 text-earth-400">…</span> : null}
+            {idx > 0 && arr[idx - 1]! < p - 1 ? <span className="px-1 text-earth-500">…</span> : null}
             <Link
               href={href(p)}
               aria-current={p === page ? "page" : undefined}

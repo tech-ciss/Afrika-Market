@@ -9,5 +9,5 @@ export default async function LoginPage({
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const sp = await searchParams;
-  return <LoginForm callbackUrl={sp.callbackUrl ?? "/compte"} />;
+  return <LoginForm callbackUrl={sp.callbackUrl ?? "/compte/commandes"} />;
 }

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getCategories } from "@/lib/services/catalog.service";
 import { getProducerByUserId } from "@/lib/services/producer.service";
 import { ProductForm } from "@/components/features/product-form";
+import { PageHeader } from "@/components/ui/page-header";
 import { parseJsonArray } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Modifier un produit" };
@@ -24,7 +25,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold text-earth-900">Modifier : {product.name}</h2>
+      <PageHeader title="Modifier le produit" description={product.name} />
       <ProductForm
         product={{
           id: product.id,

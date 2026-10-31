@@ -113,7 +113,7 @@ export function AddToCart({
       <div className="flex items-end justify-between gap-4">
         <div>
           {product.compareAtPrice && product.compareAtPrice > price ? (
-            <p className="text-sm text-earth-400 line-through">{formatFCFA(product.compareAtPrice)}</p>
+            <p className="text-sm text-earth-500 line-through">{formatFCFA(product.compareAtPrice)}</p>
           ) : null}
           <p className="text-3xl font-extrabold tracking-tight text-brand-700">{formatFCFA(price)}</p>
           <p className="text-sm text-earth-500">par {product.unit} · TTC</p>
@@ -123,7 +123,7 @@ export function AddToCart({
             soldOut
               ? "rounded-full bg-earth-100 px-3 py-1 text-xs font-semibold text-earth-600"
               : lowStock
-                ? "rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                ? "rounded-full bg-sun-50 px-3 py-1 text-xs font-semibold text-sun-700"
                 : "rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold text-forest-700"
           }
         >
@@ -201,7 +201,7 @@ export function AddToCart({
           aria-pressed={wishlist}
           aria-label={wishlist ? "Retirer de la liste d'envies" : "Ajouter à la liste d'envies"}
         >
-          <Heart className={wishlist ? "h-5 w-5 fill-red-500 text-red-500" : "h-5 w-5"} />
+          <Heart className={wishlist ? "h-5 w-5 fill-kola-500 text-kola-600" : "h-5 w-5"} />
         </Button>
       </div>
 
@@ -211,7 +211,7 @@ export function AddToCart({
           className={
             message.type === "success"
               ? "flex items-center gap-2 text-sm font-medium text-forest-700"
-              : "flex items-center gap-2 text-sm font-medium text-red-600"
+              : "flex items-center gap-2 text-sm font-medium text-kola-600"
           }
         >
           {message.type === "success" ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}

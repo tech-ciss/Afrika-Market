@@ -7,7 +7,8 @@ import { isSandboxEnabled } from "@/lib/services/payment.service";
 import { simulatePaymentAction } from "@/actions/payment";
 import { formatFCFA } from "@/lib/utils";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/validations/enums";
-import { Alert, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/surfaces";
+import { Alert } from "@/components/ui/surfaces";
+import { CheckoutSteps } from "@/components/features/checkout-steps";
 
 export const metadata: Metadata = { title: "Paiement (simulation)", robots: { index: false, follow: false } };
 
@@ -39,42 +40,46 @@ export default async function SandboxPaymentPage({
   const confirmationHref = `/confirmation?num=${order.number}${t ? `&t=${t}` : ""}`;
   const methodLabel = PAYMENT_METHOD_LABELS[order.paymentMethod as PaymentMethod] ?? "Paiement";
 
+  const isMobileMoney = ["wave", "orange", "mtn", "moov"].includes(order.paymentMethod);
+
   return (
-    <div className="container-page py-10">
+    <div className="container-page py-8 sm:py-10">
+      <CheckoutSteps current={2} />
       <div className="mx-auto max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Smartphone className="h-5 w-5 text-brand-600" aria-hidden /> {methodLabel}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
+        <div className="overflow-hidden rounded-2xl border border-earth-200 bg-white shadow-lift">
+          <div className="on-dark bg-brand-900 px-6 pb-6 pt-5 text-white">
+            <h1 className="flex items-center gap-2 font-sans text-sm font-semibold tracking-normal text-sun-300">
+              <Smartphone className="h-4 w-4" aria-hidden /> Paiement {methodLabel}
+            </h1>
+            <p className="mt-4 text-sm text-white/70">Montant à payer</p>
+            <p className="font-display text-5xl font-extrabold tracking-tight text-white">{formatFCFA(payment.amount)}</p>
+            <p className="mt-2 text-xs text-white/60">Commande {order.number}</p>
+          </div>
+          <div className="weave" aria-hidden />
+
+          <div className="space-y-4 p-6 text-sm">
             <Alert tone="info">
               Mode démonstration : aucun argent n&apos;est débité. Choisissez l&apos;issue du paiement à simuler.
             </Alert>
 
-            <dl className="space-y-1">
-              <div className="flex justify-between">
-                <dt className="text-earth-600">Commande</dt>
-                <dd className="font-semibold text-earth-900">{order.number}</dd>
-              </div>
-              <div className="flex justify-between border-t border-earth-100 pt-2 text-base">
-                <dt className="font-semibold text-earth-900">Montant à payer</dt>
-                <dd className="font-bold text-brand-700">{formatFCFA(payment.amount)}</dd>
-              </div>
-            </dl>
-
             {pending ? (
-              <form action={simulatePaymentAction} className="grid gap-3">
-                <input type="hidden" name="providerRef" value={ref} />
-                <input type="hidden" name="t" value={t ?? ""} />
-                <button type="submit" name="outcome" value="PAID" className="btn-primary btn-lg w-full">
-                  <ShieldCheck className="h-5 w-5" aria-hidden /> Confirmer le paiement
-                </button>
-                <button type="submit" name="outcome" value="FAILED" className="btn-secondary btn-md w-full">
-                  Simuler un échec
-                </button>
-              </form>
+              <>
+                <p className="text-earth-600">
+                  {isMobileMoney
+                    ? "En réel, vous recevriez une demande de confirmation sur votre téléphone. Ici, vous la simulez."
+                    : "En réel, vous saisiriez les informations de votre carte sur la page sécurisée du prestataire."}
+                </p>
+                <form action={simulatePaymentAction} className="grid gap-3">
+                  <input type="hidden" name="providerRef" value={ref} />
+                  <input type="hidden" name="t" value={t ?? ""} />
+                  <button type="submit" name="outcome" value="PAID" className="btn-primary btn-lg w-full">
+                    <ShieldCheck className="h-5 w-5" aria-hidden /> Confirmer le paiement
+                  </button>
+                  <button type="submit" name="outcome" value="FAILED" className="btn-secondary btn-md w-full">
+                    Simuler un échec
+                  </button>
+                </form>
+              </>
             ) : (
               <div className="space-y-3">
                 <Alert tone="warning">Ce paiement n&apos;est plus en attente (statut de la commande : {order.status}).</Alert>
@@ -83,8 +88,8 @@ export default async function SandboxPaymentPage({
                 </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

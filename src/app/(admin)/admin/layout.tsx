@@ -1,69 +1,66 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  BadgeCheck,
-  FolderTree,
-  Inbox,
-  LayoutDashboard,
-  Megaphone,
-  MessageSquare,
-  Package,
-  Settings,
-  ShoppingCart,
-  Tags,
-  Truck,
-  Users,
-} from "lucide-react";
+import { ExternalLink, ShieldCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
+import { prisma } from "@/lib/db/prisma";
+import { DashboardNav, type DashboardNavItem } from "@/components/layout/dashboard-nav";
 
 export const metadata: Metadata = { title: "Back-office" };
 
-const NAV = [
-  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
-  { href: "/admin/produits", label: "Produits", icon: Package },
-  { href: "/admin/producteurs", label: "Producteurs", icon: BadgeCheck },
-  { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
-  { href: "/admin/catalogue", label: "Catégories", icon: FolderTree },
-  { href: "/admin/avis", label: "Avis", icon: MessageSquare },
-  { href: "/admin/promotions", label: "Promotions", icon: Tags },
-  { href: "/admin/zones", label: "Livraison", icon: Truck },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Megaphone },
-  { href: "/admin/messages", label: "Messages", icon: Inbox },
-  { href: "/admin/parametres", label: "Paramètres", icon: Settings },
-];
+const ROLE_LABELS: Record<string, string> = { ADMIN: "Administrateur", SUPER_ADMIN: "Super-administrateur" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireRole("ADMIN", "SUPER_ADMIN");
 
+  // Pastilles : ce qui attend une décision de l'équipe.
+  const [pendingProducers, pendingReviews, unreadMessages] = await Promise.all([
+    prisma.producer.count({ where: { status: "PENDING" } }),
+    prisma.review.count({ where: { status: "PENDING" } }),
+    prisma.contactMessage.count({ where: { isRead: false } }),
+  ]);
+
+  const items: DashboardNavItem[] = [
+    { href: "/admin", label: "Tableau de bord", icon: "dashboard", section: "Activité" },
+    { href: "/admin/commandes", label: "Commandes", icon: "cart", section: "Activité" },
+    { href: "/admin/produits", label: "Produits", icon: "products", section: "Activité" },
+    { href: "/admin/producteurs", label: "Producteurs", icon: "producers", section: "Activité", badge: pendingProducers || undefined },
+    { href: "/admin/catalogue", label: "Catégories", icon: "categories", section: "Contenu" },
+    { href: "/admin/promotions", label: "Promotions", icon: "promotions", section: "Contenu" },
+    { href: "/admin/avis", label: "Avis", icon: "reviews", section: "Contenu", badge: pendingReviews || undefined },
+    { href: "/admin/newsletter", label: "Newsletter", icon: "newsletter", section: "Contenu" },
+    { href: "/admin/messages", label: "Messages", icon: "messages", section: "Contenu", badge: unreadMessages || undefined },
+    { href: "/admin/utilisateurs", label: "Utilisateurs", icon: "users", section: "Plateforme" },
+    { href: "/admin/zones", label: "Livraison", icon: "delivery", section: "Plateforme" },
+    { href: "/admin/parametres", label: "Paramètres", icon: "settings", section: "Plateforme" },
+  ];
+
   return (
-    <div className="container-page py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-earth-900">Back-office AFRIKA MARKET</h1>
-          <p className="mt-1 text-sm text-earth-600">
-            Connecté comme {user.name ?? user.email} · rôle {user.role}
-          </p>
-        </div>
-        <Link href="/" className="btn-secondary btn-md">
-          Voir le site
-        </Link>
+    <div className="container-page py-6 lg:py-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[250px_1fr] lg:gap-8">
+        <aside className="min-w-0 lg:sticky lg:top-28 lg:h-fit">
+          <div className="on-dark overflow-hidden rounded-2xl bg-brand-950 text-white">
+            <div className="weave" aria-hidden />
+            <div className="p-4">
+              <p className="flex items-center gap-2 font-display text-lg font-extrabold text-white">
+                <ShieldCheck className="h-5 w-5 text-sun-400" aria-hidden /> Back-office
+              </p>
+              <p className="mt-1 truncate text-xs text-white/60">
+                {user.name ?? user.email} · {ROLE_LABELS[user.role] ?? user.role}
+              </p>
+            </div>
+            <div className="px-3 pb-3">
+              <DashboardNav items={items} label="Navigation administrateur" rootHref="/admin" tone="dark" />
+            </div>
+            <div className="hidden border-t border-white/10 px-4 py-3 lg:block">
+              <Link href="/" className="flex items-center gap-1.5 py-1 text-xs font-semibold text-sun-300 hover:text-sun-200">
+                Voir le site <ExternalLink className="h-3 w-3" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </aside>
+
+        <div className="min-w-0">{children}</div>
       </div>
-
-      <nav className="mb-6 flex flex-wrap gap-1.5 rounded-2xl border border-earth-200 bg-white p-2" aria-label="Navigation admin">
-        {NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-earth-700 hover:bg-brand-50 hover:text-brand-700"
-          >
-            <item.icon className="h-4 w-4" aria-hidden />
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-
-      {children}
     </div>
   );
 }

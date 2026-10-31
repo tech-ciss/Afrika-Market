@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { IMAGE_URL_ERROR, isAllowedImageUrl } from "@/config/images";
 import { promoScopeSchema, promoTypeSchema, reviewStatusSchema } from "./enums";
 
 const slugSchema = z
@@ -12,7 +13,7 @@ export const categorySchema = z.object({
   name: z.string().trim().min(2, "Nom requis").max(60),
   slug: slugSchema,
   description: z.string().trim().max(500).optional().or(z.literal("")),
-  imageUrl: z.string().trim().url().optional().or(z.literal("")),
+  imageUrl: z.string().trim().refine(isAllowedImageUrl, IMAGE_URL_ERROR).optional().or(z.literal("")),
   parentId: z.string().optional().nullable(),
   position: z.coerce.number().int().min(0).max(9999).default(0),
   isActive: z.coerce.boolean().default(true),
@@ -42,7 +43,7 @@ export const productSchema = z.object({
   weight: z.coerce.number().int().min(0).nullable().optional(),
   sku: z.string().trim().max(60).optional().or(z.literal("")),
   tags: z.string().trim().max(300).optional().or(z.literal("")),
-  images: z.array(z.string().trim().url("URL d'image invalide")).max(8).default([]),
+  images: z.array(z.string().trim().refine(isAllowedImageUrl, IMAGE_URL_ERROR)).max(8).default([]),
   characteristics: z.array(z.object({ label: z.string().max(60), value: z.string().max(120) })).max(12).default([]),
   ...originFields,
   isActive: z.coerce.boolean().default(true),
@@ -67,7 +68,8 @@ export const producerProfileSchema = z.object({
   city: z.string().trim().min(2).max(80),
   specialties: z.string().trim().max(300).optional().or(z.literal("")),
   certifications: z.string().trim().max(300).optional().or(z.literal("")),
-  logoUrl: z.string().trim().url().optional().or(z.literal("")),
+  logoUrl: z.string().trim().refine(isAllowedImageUrl, IMAGE_URL_ERROR).optional().or(z.literal("")),
+  coverUrl: z.string().trim().refine(isAllowedImageUrl, IMAGE_URL_ERROR).optional().or(z.literal("")),
 });
 
 export const reviewSchema = z.object({
