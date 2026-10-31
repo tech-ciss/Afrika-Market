@@ -97,7 +97,7 @@ export default async function AdminProducersPage({ searchParams }: { searchParam
 
       {pending > 0 && filter === "ALL" ? (
         <p className="mb-4 rounded-xl border border-sun-300 bg-sun-50 px-4 py-3 text-sm font-medium text-brand-950">
-          {pending} producteur{pending > 1 ? "s" : ""} en attente d'approbation : les boutons « Approuver » et « Refuser » sont en
+          {pending} producteur{pending > 1 ? "s" : ""} en attente d&apos;approbation : les boutons « Approuver » et « Refuser » sont en
           tête de liste.
         </p>
       ) : null}
