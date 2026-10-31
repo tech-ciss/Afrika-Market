@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Artisanat &amp; décoration">
-  <rect width="800" height="800" fill="#121a42"/>
-  <path d="M170 640 V360 a230 230 0 0 1 460 0 V640 Z" fill="#4358b9"/>
-  <path d="M215 640 V365 a185 185 0 0 1 370 0 V640 Z" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
-  <circle cx="400" cy="330" r="62" fill="#ffffff" fill-opacity="0.18"/>
-  <text x="400" y="560" font-size="30" text-anchor="middle" fill="#ffffff" fill-opacity="0.8" font-family="system-ui, sans-serif">Photo à venir</text>
-</svg>

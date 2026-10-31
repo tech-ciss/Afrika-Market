@@ -40,7 +40,7 @@ export default async function SandboxPaymentPage({
   const confirmationHref = `/confirmation?num=${order.number}${t ? `&t=${t}` : ""}`;
   const methodLabel = PAYMENT_METHOD_LABELS[order.paymentMethod as PaymentMethod] ?? "Paiement";
 
-  const isMobileMoney = ["wave", "orange", "mtn", "moov"].includes(order.paymentMethod);
+  const isMobileMoney = ["wave", "orange", "mtn", "moov"].includes(order.paymentMethod ?? "");
 
   return (
     <div className="container-page py-8 sm:py-10">
